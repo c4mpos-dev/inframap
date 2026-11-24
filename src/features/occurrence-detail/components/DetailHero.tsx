@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { StrokeIcon } from '@/components/icons/StrokeIcon'
 import { PhotoPlaceholder } from '@/components/ui/PhotoPlaceholder'
+import { ZoomablePhoto } from '@/components/ui/ZoomablePhoto'
 import type { Occurrence } from '@/domain/types'
 import { shareOccurrence } from '../shareOccurrence'
 
@@ -16,10 +17,11 @@ export function DetailHero({ occurrence, onLinkCopied }: DetailHeroProps) {
   return (
     <div data-surface="dark" className="relative h-75 shrink-0">
       {occurrence.photoUrl ? (
-        <img
+        <ZoomablePhoto
           src={occurrence.photoUrl}
           alt={`Foto enviada pelo morador: ${occurrence.title}`}
-          className="size-full object-cover"
+          className="size-full"
+          badgeClassName="right-4 bottom-10"
         />
       ) : (
         <PhotoPlaceholder className="size-full" label="sem foto" />

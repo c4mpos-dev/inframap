@@ -1,6 +1,7 @@
 import { StrokeIcon } from '@/components/icons/StrokeIcon'
 import { ConfirmButton } from '@/components/ui/ConfirmButton'
 import { PhotoPlaceholder } from '@/components/ui/PhotoPlaceholder'
+import { ZoomablePhoto } from '@/components/ui/ZoomablePhoto'
 import { ShareButton } from '@/components/ui/ShareButton'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { StatusProgress } from '@/components/ui/StatusProgress'
@@ -29,7 +30,11 @@ export function SelectedOccurrenceCard({
     >
       <div className="relative">
         {occurrence.photoUrl ? (
-          <img src={occurrence.photoUrl} alt="" className="h-33 w-full object-cover" />
+          <ZoomablePhoto
+            src={occurrence.photoUrl}
+            alt={`Foto enviada pelo morador: ${occurrence.title}`}
+            className="h-33 w-full"
+          />
         ) : (
           <PhotoPlaceholder className="h-33" label="sem foto" />
         )}

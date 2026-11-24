@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router'
 import { StrokeIcon } from '@/components/icons/StrokeIcon'
 import { PhotoPlaceholder } from '@/components/ui/PhotoPlaceholder'
+import { ZoomablePhoto } from '@/components/ui/ZoomablePhoto'
 import type { NearbyOccurrence } from '@/data/occurrencesRepo'
 import { teamRepo } from '@/data/teamRepo'
 import { getCategory } from '@/domain/categories'
@@ -75,10 +76,10 @@ export function ReviewPanel({ occurrence, onSaved }: ReviewPanelProps) {
       </div>
 
       {occurrence.photoUrl ? (
-        <img
+        <ZoomablePhoto
           src={occurrence.photoUrl}
-          alt="Foto do morador"
-          className="h-37.5 rounded-[14px] object-cover"
+          alt={`Foto do morador: ${occurrence.title}`}
+          className="h-37.5 w-full rounded-[14px]"
         />
       ) : (
         <PhotoPlaceholder className="h-37.5 rounded-[14px]" label="sem foto" />

@@ -94,6 +94,24 @@ O `start` mostra a URL (`http://127.0.0.1:54321`) e a chave anon locais para col
 - Só a equipe (tabela `staff`) muda situação, repassa, junta duplicados, marca inválido e lê denúncias, sempre por funções do banco.
 - Fotos vão para o bucket público `occurrence-photos`, até 5 MB, só imagem, cada pessoa na própria pasta.
 
+## Publicar na Vercel
+
+O `vercel.json` já cuida das rotas (recarregar `/mapa` não dá 404), do cache dos arquivos e de cabeçalhos de segurança.
+
+1. Em https://vercel.com, _Add New → Project_, importe o repositório do GitHub. A Vercel reconhece o Vite sozinha.
+2. Em _Environment Variables_, cadastre as mesmas três do `.env.local`: `VITE_MAPBOX_TOKEN`, `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` (a chave _anon_/pública; a `service_role` nunca vai para o front).
+3. _Deploy_. A URL fica no formato `https://<projeto>.vercel.app`.
+4. Depois do primeiro deploy, aponte os serviços para a URL nova:
+   - **Supabase** → _Authentication → URL Configuration_: _Site URL_ = a URL da Vercel e, em _Redirect URLs_, `https://<projeto>.vercel.app/**`.
+   - **Google Cloud** (projeto `inframap-515715`) → _Clientes → InfraMap Supabase_: adicione a URL da Vercel em _Origens JavaScript autorizadas_. Em _Branding_, preencha página inicial, `/privacidade`, `/termos` e o domínio autorizado (`vercel.app` não serve: use o domínio completo do projeto). Em _Público-alvo_, _Publicar app_.
+   - **Mapbox**: se o token tiver restrição de URL, adicione a URL da Vercel.
+
+### Prévia no WhatsApp e SEO
+
+O `index.html` traz título, descrição, Open Graph e Twitter card com a imagem `public/og.png` (1200×630). As URLs absolutas que o WhatsApp exige são montadas no build: na Vercel vêm de `VERCEL_PROJECT_PRODUCTION_URL`; com domínio próprio, defina `VITE_SITE_URL`. O build também gera `robots.txt` e `sitemap.xml`.
+
+A imagem e os ícones PNG saem de `scripts/brand/og.html` e `scripts/brand/icon.html`, renderizados no Chrome sem interface (`--headless=new --screenshot`). O WhatsApp guarda a prévia em cache: se trocar a imagem, mude o nome do arquivo.
+
 ## Scripts
 
 | Comando             | O que faz                     |
@@ -194,4 +212,5 @@ O projeto é construído em etapas, seguindo o briefing e o design no Claude Des
 - [ ] Etapa 9 · Testes e entrega
   - [x] Testes da lógica, fluxos principais, acessibilidade e celular de entrada
   - [ ] Formulários SUS e NPS
+  - [x] Prévia de link (WhatsApp), ícones PNG, robots, sitemap e `vercel.json`
   - [ ] Deploy na Vercel

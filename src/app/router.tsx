@@ -10,15 +10,17 @@ const page = (load: () => Promise<{ default: ComponentType }>) => async () => ({
 })
 
 export const router = createBrowserRouter([
+  { path: '/', HydrateFallback: RouteFallback, lazy: page(() => import('@/pages/HomePage')) },
   {
     element: <AppLayout />,
     HydrateFallback: RouteFallback,
     children: [
-      { path: '/', lazy: page(() => import('@/pages/HomePage')) },
       { path: '/mapa', lazy: page(() => import('@/pages/MapPage')) },
       { path: '/indicadores', lazy: page(() => import('@/pages/IndicatorsPage')) },
       { path: '/meus-relatos', lazy: page(() => import('@/pages/MyReportsPage')) },
       { path: '/perfil', lazy: page(() => import('@/pages/ProfilePage')) },
+      { path: '/privacidade', lazy: page(() => import('@/pages/PrivacyPage')) },
+      { path: '/termos', lazy: page(() => import('@/pages/TermsPage')) },
       ...(import.meta.env.DEV
         ? [{ path: '/dev/componentes', lazy: page(() => import('@/pages/dev/ComponentsPage')) }]
         : []),

@@ -39,6 +39,10 @@ Depois de mudar o `.env.local`, reinicie o `npm run dev`. Sem token, o app funci
 
 | Rota               | O que tem                                                                    |
 | ------------------ | ---------------------------------------------------------------------------- |
+| `/`                | Início: “Viu? Marca.”, como funciona, o que é e não é, encontros, quem faz   |
+| `/entrar`          | Entrar com Google, e-mail ou marcar sem se identificar (login ainda inativo) |
+| `/privacidade`     | Privacidade e LGPD (rascunho para revisão do grupo)                          |
+| `/termos`          | Termos de uso (rascunho para revisão do grupo)                               |
 | `/mapa`            | Mapa com os relatos, busca, filtros de categoria e situação, lista e detalhe |
 | `/marcar`          | Marcar um problema (4 passos no celular, uma tela no computador)             |
 | `/ocorrencia/:id`  | Detalhe: foto, confirmação, andamento, parecidos perto e denúncia            |
@@ -46,7 +50,7 @@ Depois de mudar o `.env.local`, reinicie o `npm run dev`. Sem token, o app funci
 | `/equipe`          | Painel da equipe: fila, situação, repasse, nota, duplicados e inválidos      |
 | `/dev/componentes` | Vitrine dos componentes (só em desenvolvimento)                              |
 
-`/`, `/entrar`, `/meus-relatos` e `/perfil` ainda são telas vazias.
+`/meus-relatos` e `/perfil` ainda são telas vazias.
 
 ## Como testar o que já existe
 
@@ -54,7 +58,8 @@ Depois de mudar o `.env.local`, reinicie o `npm run dev`. Sem token, o app funci
 2. **Marcar**: abra `/marcar`, escolha o ponto, a categoria e envie. O relato novo aparece no mapa com protocolo `#RES-0147` em diante. Marcando de novo no mesmo ponto e categoria, aparece o aviso de parecido.
 3. **Detalhe**: em qualquer relato, use "Eu também vi", compartilhe ou denuncie.
 4. **Indicadores**: abra `/indicadores` e troque período, bairro e categoria.
-5. **Equipe**: abra `/equipe`, clique em "Entrar como equipe", escolha um relato, mude a situação, escreva uma nota e salve. A nota aparece no andamento do detalhe. "Juntar os dois" transforma o mais novo em duplicado do mais antigo, e "Marcar inválido" tira o relato do mapa e dos números.
+5. **Início e Entrar**: abra `/`, use o menu ☰ no celular e os atalhos "Como funciona" e "Encontros". Em `/entrar`, teste os três caminhos.
+6. **Equipe**: abra `/equipe`, clique em "Entrar como equipe", escolha um relato, mude a situação, escreva uma nota e salve. A nota aparece no andamento do detalhe. "Juntar os dois" transforma o mais novo em duplicado do mais antigo, e "Marcar inválido" tira o relato do mapa e dos números.
 
 Para voltar ao estado inicial, limpe os dados do site no navegador (ou rode `localStorage.clear()` no console).
 
@@ -65,6 +70,16 @@ Para voltar ao estado inicial, limpe os dados do site no navegador (ou rode `loc
 - **Modo equipe sem senha**: o acesso a `/equipe` é só de demonstração.
 - **Fotos**: são reduzidas para no máximo 1280 px e convertidas para JPEG no próprio aparelho (isso tira o GPS escondido na foto), mas ainda não vão para nenhum servidor.
 - **Dias de encontro**: as datas em `src/domain/encounters.ts` são provisórias (24/10, 31/10, 07/11 e 14/11).
+- **Entrar**: Google e e-mail ainda não fazem login; mostram que o recurso chega em breve e sugerem marcar sem se identificar.
+
+## Pendências de conteúdo
+
+Ficam em `src/domain/project.ts` e aparecem como `[placeholder]` nas telas até alguém preencher:
+
+- Associação e data/horário de cada um dos 4 encontros (`ENCOUNTERS`).
+- @ do perfil do Instagram (`PROJECT_INSTAGRAM`).
+- E-mail de contato do projeto para pedidos de remoção e LGPD (`PROJECT_CONTACT_EMAIL`).
+- Revisão final dos textos de `/privacidade` e `/termos`.
 
 ## Stack
 
@@ -97,6 +112,6 @@ O projeto é construído em etapas, seguindo o briefing e o design no Claude Des
 - [x] Etapa 4 · Detalhe da ocorrência: confirmação, linha do tempo, parecidos e denúncia
 - [x] Etapa 5 · Indicadores: metas, gráficos, filtros e CSV
 - [x] Etapa 6 · Painel da equipe: fila, situação, repasse, nota, duplicados e inválidos
-- [ ] Etapa 7 · Início e Entrar
+- [x] Etapa 7 · Início e Entrar: página inicial, menu do celular, tela de entrar, privacidade e termos
 - [ ] Etapa 8 · Supabase
 - [ ] Etapa 9 · Testes e entrega

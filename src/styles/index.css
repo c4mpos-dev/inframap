@@ -48,6 +48,34 @@
   --animate-pop: pop 0.35s ease-out;
   --animate-grow-down: grow-down 0.8s 0.2s ease-out both;
   --animate-live: live 1.8s ease-out infinite;
+  --animate-tilt: tilt 6s ease-in-out infinite;
+  --animate-drop-in: drop-in 0.7s var(--ease-bounce) both;
+
+  @keyframes tilt {
+    0%,
+    100% {
+      transform: rotate(-3deg);
+    }
+    50% {
+      transform: rotate(-1deg) translateY(-6px);
+    }
+  }
+
+  @keyframes drop-in {
+    0% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+    60% {
+      transform: translateY(5px);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
   --animate-grow-up: grow-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   --animate-grow-right: grow-right 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 
@@ -244,6 +272,28 @@
   font-weight: 900;
   font-stretch: 125%;
   letter-spacing: -0.02em;
+}
+
+@utility road-stripe-x {
+  background: repeating-linear-gradient(90deg, var(--color-faixa) 0 56px, transparent 56px 96px);
+  animation: road-x 2.4s linear infinite;
+}
+
+@utility road-stripe-y {
+  background: repeating-linear-gradient(180deg, var(--color-faixa) 0 56px, transparent 56px 96px);
+  animation: road-y 1.6s linear infinite;
+}
+
+@keyframes road-x {
+  to {
+    background-position: -96px 0;
+  }
+}
+
+@keyframes road-y {
+  to {
+    background-position: 0 96px;
+  }
 }
 
 @utility scrollbar-none {

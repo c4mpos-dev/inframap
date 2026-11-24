@@ -16,7 +16,7 @@ export function ConfirmButton({ confirmed, count, onToggle, className = '' }: Co
       type="button"
       aria-pressed={confirmed}
       onClick={onToggle}
-      className={`flex h-12 items-center justify-center gap-2 rounded-control border-2 border-asfalto px-4 text-[15px] font-extrabold shadow-[0_2px_0_var(--color-asfalto)] transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-[0_4px_0_var(--color-asfalto)] active:translate-y-px active:shadow-none ${
+      className={`flex h-12 items-center justify-center gap-2 rounded-control border-2 border-asfalto px-4 text-[15px] font-extrabold whitespace-nowrap shadow-[0_2px_0_var(--color-asfalto)] transition-[transform,box-shadow] duration-150 hover:-translate-y-px hover:shadow-[0_4px_0_var(--color-asfalto)] active:translate-y-px active:shadow-none ${
         confirmed ? 'bg-asfalto text-faixa' : 'bg-faixa text-asfalto'
       } ${className}`}
     >

@@ -27,17 +27,17 @@ export function SelectedOccurrenceCard({
     <article
       key={occurrence.id}
       aria-label="Ocorrência selecionada"
-      className="absolute bottom-7 left-5 z-10 hidden w-95 max-w-[calc(100%-40px)] animate-rise overflow-hidden rounded-card border-2 border-asfalto bg-branco shadow-[0_3px_0_var(--color-asfalto),0_18px_40px_rgba(28,31,30,0.18)] md:block"
+      className="absolute bottom-7 left-5 z-10 hidden w-115 max-w-[calc(100%-40px)] animate-rise overflow-hidden rounded-card border-2 border-asfalto bg-branco shadow-[0_3px_0_var(--color-asfalto),0_18px_40px_rgba(28,31,30,0.18)] md:block"
     >
       <div className="relative">
         {occurrence.photoUrl ? (
           <ZoomablePhoto
             src={occurrence.photoUrl}
             alt={`Foto enviada pelo morador: ${occurrence.title}`}
-            className="h-33 w-full"
+            className="h-48 w-full"
           />
         ) : (
-          <PhotoPlaceholder className="h-33" label="sem foto" />
+          <PhotoPlaceholder className="h-48" label="sem foto" />
         )}
         <span className="absolute top-3 left-3">
           <StatusBadge status={occurrence.status} />

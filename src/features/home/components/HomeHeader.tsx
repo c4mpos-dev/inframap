@@ -3,6 +3,8 @@ import { Link } from 'react-router'
 import { AppIcon } from '@/components/brand/AppIcon'
 import { StrokeIcon } from '@/components/icons/StrokeIcon'
 import { iconPaths } from '@/components/icons/paths'
+import { AccountLink } from '@/components/layout/AccountLink'
+import { firstName, useAccount } from '@/data/useAccount'
 
 const links = [
   { to: '/mapa', label: 'Mapa' },
@@ -44,6 +46,13 @@ function NavAnchor({
 }
 
 export function HomeHeader() {
+  const { account } = useAccount()
+  const accountLinks = account
+    ? [
+        { to: '/meus-relatos', label: 'Meus relatos' },
+        { to: '/perfil', label: `Perfil · ${firstName(account)}` },
+      ]
+    : [{ to: '/entrar', label: 'Entrar' }]
   const menuRef = useRef<HTMLDialogElement>(null)
   const closeMenu = () => menuRef.current?.close()
 
@@ -55,12 +64,7 @@ export function HomeHeader() {
           <NavAnchor key={link.to} {...link} />
         ))}
       </nav>
-      <Link
-        to="/entrar"
-        className="ml-auto hidden py-3 text-[15px] font-semibold text-giz no-underline hover:text-concreto md:block"
-      >
-        Entrar
-      </Link>
+      <AccountLink className="ml-auto hidden md:flex" />
       <button
         type="button"
         aria-label="Abrir menu"
@@ -92,7 +96,7 @@ export function HomeHeader() {
             </button>
           </div>
           <nav aria-label="Menu" className="flex flex-col text-lg font-bold">
-            {[...links, { to: '/entrar', label: 'Entrar' }].map((link) => (
+            {[...links, ...accountLinks].map((link) => (
               <NavAnchor key={link.to} {...link} onNavigate={closeMenu} />
             ))}
           </nav>

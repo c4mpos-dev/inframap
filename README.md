@@ -148,13 +148,23 @@ O site funciona só com teclado, do primeiro "Pular para o conteúdo" até o env
 
 Grupo 3 de extensão da AEDB (Associação Educacional Dom Bosco), em Resende, com orientação do professor **Douglas Rosa Grillo**.
 
-|                                  |                                  |
-| -------------------------------- | -------------------------------- |
-| Cauã Campos de Souza e Silva     | Isabella Leite Benjamim          |
-| Guilherme Henrique Valim Soares  | João Gabriel Santos Juvenal      |
-| Gustavo Pontes Mazoni            | Samuel Barbosa da Silva          |
-| Igor Pontes Mazoni               | Weslley Candido Madeira da Rocha |
-| Wendell Candido Madeira da Rocha |                                  |
+<table>
+  <tr>
+    <td>Cauã Campos de Souza e Silva</td>
+    <td>Guilherme Henrique Valim Soares</td>
+    <td>Gustavo Pontes Mazoni</td>
+  </tr>
+  <tr>
+    <td>Igor Pontes Mazoni</td>
+    <td>Isabella Leite Benjamim</td>
+    <td>João Gabriel Santos Juvenal</td>
+  </tr>
+  <tr>
+    <td>Samuel Barbosa da Silva</td>
+    <td>Weslley Candido Madeira da Rocha</td>
+    <td>Wendell Candido Madeira da Rocha</td>
+  </tr>
+</table>
 
 O projeto se apoia no Objetivo de Desenvolvimento Sustentável 9.1 da ONU: infraestrutura de qualidade, confiável e acessível para todo mundo.
 

@@ -42,8 +42,10 @@ O banco, as regras de acesso e as funções ficam em `supabase/migrations/`. As 
    ```bash
    npx supabase login
    npx supabase link --project-ref SEU_REF
-   npx supabase db push
+   npx supabase db push --remote
    ```
+
+   Sem `--remote`, o `db push` grava no banco local do Docker, não na nuvem. O seed (relatos de exemplo) não vai para a nuvem.
 
 3. Em _Authentication → Sign In / Providers_, ligue **Allow anonymous sign-ins** (é o que permite marcar sem se identificar) e deixe o **Email** ligado.
 4. Em _Authentication → URL Configuration_, coloque a URL do site em _Site URL_ e adicione `http://localhost:5173/**` em _Redirect URLs_ (e a URL da Vercel quando houver deploy).

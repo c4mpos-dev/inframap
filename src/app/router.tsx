@@ -17,6 +17,9 @@ export const router = createBrowserRouter([
       { path: '/indicadores', lazy: page(() => import('@/pages/IndicatorsPage')) },
       { path: '/meus-relatos', lazy: page(() => import('@/pages/MyReportsPage')) },
       { path: '/perfil', lazy: page(() => import('@/pages/ProfilePage')) },
+      ...(import.meta.env.DEV
+        ? [{ path: '/dev/componentes', lazy: page(() => import('@/pages/dev/ComponentsPage')) }]
+        : []),
       { path: '*', lazy: page(() => import('@/pages/NotFoundPage')) },
     ],
   },

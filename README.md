@@ -38,8 +38,8 @@ O **InfraMap** é o lugar para essa reclamação não se perder. Você marca o p
 
 ```mermaid
 flowchart LR
-    A["Aberta<br/>alguém marcou"] --> B["Em andamento<br/>repassado ou em obra"]
-    B --> C["Resolvida<br/>consertado e conferido"]
+    A["Aberta"] --> B["Em andamento"]
+    B --> C["Resolvida"]
     style A fill:#C2410C,color:#fff,stroke:#1C1F1E
     style B fill:#1D5FD1,color:#fff,stroke:#1C1F1E
     style C fill:#157A4F,color:#fff,stroke:#1C1F1E

@@ -1,0 +1,333 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-*: initial;
+  --color-asfalto: #1c1f1e;
+  --color-asfalto-2: #2a2e2c;
+  --color-faixa: #ffc21a;
+  --color-concreto: #f1eee7;
+  --color-meio-fio: #e6e1d6;
+  --color-brita: #5e5a52;
+  --color-linha: #e0dacd;
+  --color-branco: #ffffff;
+  --color-giz: #e4dfd4;
+  --color-poeira: #cfc9bd;
+  --color-grafite: #4a4f4c;
+  --color-carvao: #3c3a35;
+  --color-aberta: #c2410c;
+  --color-andamento: #1d5fd1;
+  --color-resolvida: #157a4f;
+  --color-mapa-fundo: #e9e5dc;
+  --color-mapa-rio: #b7d0dc;
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --font-sans: 'Archivo', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --radius-control: 12px;
+  --radius-card: 20px;
+
+  --shadow-hard: 0 3px 0 var(--color-asfalto);
+  --shadow-hard-black: 0 4px 0 #000000;
+
+  --ease-bounce: cubic-bezier(0.3, 1.4, 0.5, 1);
+
+  --animate-bob: bob 2.6s ease-in-out infinite;
+  --animate-drop: drop 0.55s var(--ease-bounce) both;
+  --animate-pulse-ring: pulse-ring 2s ease-out infinite;
+  --animate-rise: rise 0.35s ease-out both;
+  --animate-toast: toast 2.6s ease-out both;
+  --animate-float: float 1.8s ease-in-out infinite;
+  --animate-float-shadow: float-shadow 1.8s ease-in-out infinite;
+  --animate-slide-in: slide-in 0.3s ease-out both;
+  --animate-fill: fill 0.4s ease-out both;
+  --animate-pin-land: pin-land 0.9s cubic-bezier(0.5, 0, 0.5, 1) both;
+  --animate-crack: crack 0.8s 0.9s ease-out both;
+  --animate-ring: ring 1.6s 0.7s ease-out infinite;
+  --animate-pop: pop 0.35s ease-out;
+  --animate-grow-down: grow-down 0.8s 0.2s ease-out both;
+  --animate-live: live 1.8s ease-out infinite;
+  --animate-tilt: tilt 6s ease-in-out infinite;
+  --animate-drop-in: drop-in 0.7s var(--ease-bounce) both;
+
+  @keyframes tilt {
+    0%,
+    100% {
+      transform: rotate(-3deg);
+    }
+    50% {
+      transform: rotate(-1deg) translateY(-6px);
+    }
+  }
+
+  @keyframes drop-in {
+    0% {
+      transform: translateY(-60px);
+      opacity: 0;
+    }
+    60% {
+      transform: translateY(5px);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  --animate-grow-up: grow-up 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  --animate-grow-right: grow-right 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes grow-up {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes grow-right {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes pop {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    40% {
+      transform: scale(1.08);
+    }
+  }
+
+  @keyframes grow-down {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes live {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 50%, transparent);
+    }
+    100% {
+      box-shadow: 0 0 0 12px transparent;
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes float-shadow {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.35;
+    }
+    50% {
+      transform: scale(0.7);
+      opacity: 0.2;
+    }
+  }
+
+  @keyframes slide-in {
+    from {
+      transform: translateX(24px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes fill {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes pin-land {
+    0% {
+      transform: translateY(-120px);
+    }
+    55% {
+      transform: translateY(0);
+    }
+    70% {
+      transform: translateY(-14px);
+    }
+    85%,
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes crack {
+    from {
+      stroke-dashoffset: 40;
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes ring {
+    0% {
+      transform: scale(0.3);
+      opacity: 0.8;
+    }
+    100% {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-3px);
+    }
+  }
+
+  @keyframes drop {
+    0% {
+      transform: translateY(-28px);
+      opacity: 0;
+    }
+    60% {
+      transform: translateY(4px);
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulse-ring {
+    0% {
+      transform: translate(-50%, -50%) scale(0.4);
+      opacity: 0.7;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(2.6);
+      opacity: 0;
+    }
+  }
+
+  @keyframes rise {
+    from {
+      transform: translateY(16px);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes toast {
+    0% {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    12% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    85% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}
+
+@utility font-display {
+  font-weight: 900;
+  font-stretch: 125%;
+  letter-spacing: -0.02em;
+}
+
+@utility road-stripe-x {
+  background: repeating-linear-gradient(90deg, var(--color-faixa) 0 56px, transparent 56px 96px);
+  animation: road-x 2.4s linear infinite;
+}
+
+@utility road-stripe-y {
+  background: repeating-linear-gradient(180deg, var(--color-faixa) 0 56px, transparent 56px 96px);
+  animation: road-y 1.6s linear infinite;
+}
+
+@keyframes road-x {
+  to {
+    background-position: -96px 0;
+  }
+}
+
+@keyframes road-y {
+  to {
+    background-position: 0 96px;
+  }
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer base {
+  html {
+    background-color: var(--color-concreto);
+    color: var(--color-asfalto);
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-asfalto);
+    outline-offset: 2px;
+  }
+
+  [data-surface='dark'] :focus-visible {
+    outline-color: var(--color-faixa);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

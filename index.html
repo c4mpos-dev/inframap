@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>InfraMap · Resende</title>
+    <meta
+      name="description"
+      content="Viu um buraco, bueiro entupido, calçada quebrada ou poste apagado em Resende (RJ)? Marque no mapa, a vizinhança confirma e todo mundo acompanha até resolver."
+    />
+    <meta name="theme-color" content="#1C1F1E" />
+    <link rel="canonical" href="__SITE_URL__/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="InfraMap" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:url" content="__SITE_URL__/" />
+    <meta property="og:title" content="InfraMap · Viu? Marca." />
+    <meta
+      property="og:description"
+      content="Mapa colaborativo dos problemas de rua em Resende (RJ). Marque, confirme e acompanhe até resolver."
+    />
+    <meta property="og:image" content="__SITE_URL__/og.png" />
+    <meta property="og:image:secure_url" content="__SITE_URL__/og.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="InfraMap: Viu? Marca. Um pino amarelo no meio de uma rua."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="InfraMap · Viu? Marca." />
+    <meta
+      name="twitter:description"
+      content="Mapa colaborativo dos problemas de rua em Resende (RJ)."
+    />
+    <meta name="twitter:image" content="__SITE_URL__/og.png" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;600&display=swap"
+    />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "InfraMap",
+        "url": "__SITE_URL__/",
+        "description": "Mapa colaborativo de problemas de infraestrutura urbana em Resende (RJ).",
+        "applicationCategory": "GovernmentApplication",
+        "inLanguage": "pt-BR",
+        "isAccessibleForFree": true,
+        "areaServed": { "@type": "City", "name": "Resende, RJ" },
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "BRL" }
+      }
+    </script>
+  </head>
+  <body>
+    <noscript>O InfraMap precisa de JavaScript para mostrar o mapa.</noscript>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

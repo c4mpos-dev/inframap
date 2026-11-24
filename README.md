@@ -51,6 +51,17 @@ O banco, as regras de acesso e as funções ficam em `supabase/migrations/`. As 
 4. Em _Authentication → URL Configuration_, coloque a URL do site em _Site URL_ e adicione `http://localhost:5173/**` em _Redirect URLs_ (e a URL da Vercel quando houver deploy).
 5. **Google (opcional)**: em _Authentication → Sign In / Providers → Google_, cole o Client ID e o Secret criados no Google Cloud Console (_APIs & Services → Credentials → OAuth client ID_, tipo Web, com o _Callback URL_ que o Supabase mostra). Enquanto não estiver ligado, o botão avisa que o Google ainda não funciona.
 
+### E-mails de cadastro e login (Resend)
+
+O e-mail padrão do Supabase só manda para quem é membro do projeto, no máximo 2 por hora. Por isso os e-mails saem pelo Resend, com o domínio verificado .
+
+1. No Resend, crie uma API key com _Sending access_ só para esse domínio.
+2. Em _Authentication → Emails → SMTP Settings_, ligue o SMTP próprio: remetente , nome , host , porta , usuário e a API key como senha.
+3. Em _Authentication → Emails → Templates_, cole em _Confirm sign up_ (assunto "Confirme seu cadastro no InfraMap") e em _Magic link or OTP_ (assunto "Seu link para entrar no InfraMap").
+4. Deixe _Confirm email_ ligado em _Sign In / Providers_.
+
+Na primeira vez, a pessoa recebe "Confirme seu cadastro"; nas seguintes, "Seu link para entrar". No Supabase local os dois templates já vêm ligados pelo e aparecem no Mailpit (http://127.0.0.1:54324).
+
 ### Liberar alguém na equipe
 
 A pessoa entra uma vez em `/entrar` com o e-mail dela. Depois, no _SQL Editor_ do Supabase:

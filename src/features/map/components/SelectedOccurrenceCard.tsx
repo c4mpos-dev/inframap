@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import { StrokeIcon } from '@/components/icons/StrokeIcon'
 import { ConfirmButton } from '@/components/ui/ConfirmButton'
 import { PhotoPlaceholder } from '@/components/ui/PhotoPlaceholder'
@@ -56,7 +57,12 @@ export function SelectedOccurrenceCard({
             {occurrence.protocol} · {getCategory(occurrence.categoryId).shortLabel}
           </span>
           <h2 className="text-[22px] leading-tight font-extrabold [font-stretch:110%]">
-            {occurrence.title}
+            <Link
+              to={`/ocorrencia/${occurrence.id}`}
+              className="text-asfalto no-underline hover:underline"
+            >
+              {occurrence.title}
+            </Link>
           </h2>
           <span className="text-sm text-brita">
             {occurrence.neighborhood} · registrado {formatRelativeDay(occurrence.createdAt)}
@@ -70,6 +76,12 @@ export function SelectedOccurrenceCard({
             count={occurrence.confirmations}
             onToggle={onToggleConfirmation}
           />
+          <Link
+            to={`/ocorrencia/${occurrence.id}`}
+            className="flex h-12 items-center rounded-control border-2 border-asfalto bg-branco px-4 text-[15px] font-bold text-asfalto no-underline hover:bg-concreto"
+          >
+            Detalhes
+          </Link>
           <ShareButton
             title={occurrence.title}
             path={`/ocorrencia/${occurrence.id}`}

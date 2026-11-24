@@ -1,8 +1,7 @@
-import type { Occurrence, OccurrenceEvent, StatusId } from '@/domain/types'
-import { findNearbyAmong, readContentReports, type NearbyOccurrence } from './occurrencesRepo'
-import { occurrenceStore } from './occurrenceStore'
-
-const DUPLICATE_RADIUS_METERS = 50
+import type { Occurrence, StatusId } from '@/domain/types'
+import { getSupabase, unwrap } from '@/lib/supabaseClient'
+import { OCCURRENCE_COLUMNS, toOccurrence, type OccurrenceRow } from './occurrenceRows'
+import { resolveNearby, type NearbyOccurrence } from './occurrencesRepo'
 
 export interface QueueItem {
   occurrence: Occurrence
@@ -15,65 +14,68 @@ export interface TeamUpdate {
   note: string
 }
 
-const statusEventKind: Record<StatusId, OccurrenceEvent['kind']> = {
-  aberta: 'nota',
-  andamento: 'andamento',
-  resolvida: 'resolvida',
+interface QueueRow {
+  occurrence_id: number
+  report_count: number
 }
 
 export const teamRepo = {
   async queue(): Promise<QueueItem[]> {
-    const reports = readContentReports()
-    return occurrenceStore
-      .visible()
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
-      .map((occurrence) => ({
-        occurrence,
-        reportCount: reports.filter((report) => report.occurrenceId === occurrence.id).length,
-      }))
-  },
-
-  async possibleDuplicate(occurrence: Occurrence): Promise<NearbyOccurrence | null> {
-    const dismissed = occurrenceStore.teamChange(occurrence.id).dismissedDuplicates ?? []
-    const candidates = findNearbyAmong(
-      occurrenceStore.visible(),
-      occurrence.location,
-      occurrence.categoryId,
-      DUPLICATE_RADIUS_METERS,
-      occurrence.id,
-    )
-    return candidates.find((candidate) => !dismissed.includes(candidate.occurrence.id)) ?? null
-  },
-
-  async update(id: string, { status, forwardedTo, note }: TeamUpdate): Promise<void> {
-    const current = occurrenceStore.find(id)
-    if (!current) throw new Error(`Ocorrência não encontrada: ${id}`)
-    const statusChanged = status !== current.status
-    const trimmedNote = note.trim()
-    const previous = occurrenceStore.teamChange(id).events ?? []
-    const event: OccurrenceEvent | null =
-      statusChanged || trimmedNote
-        ? { kind: statusEventKind[status], at: new Date().toISOString(), note: trimmedNote || null }
-        : null
-    occurrenceStore.saveTeamChange(id, {
-      status,
-      forwardedTo,
-      events: event ? [...previous, event] : previous,
+    const queue = unwrap(await getSupabase().rpc('team_queue')) as QueueRow[]
+    const rows = unwrap(
+      await getSupabase()
+        .from('occurrences_public')
+        .select(OCCURRENCE_COLUMNS)
+        .in(
+          'id',
+          queue.map((item) => item.occurrence_id),
+        ),
+    ) as OccurrenceRow[]
+    const byId = new Map(rows.map((row) => [row.id, toOccurrence(row)]))
+    return queue.flatMap((item) => {
+      const occurrence = byId.get(item.occurrence_id)
+      return occurrence ? [{ occurrence, reportCount: item.report_count }] : []
     })
   },
 
+  async possibleDuplicate(occurrence: Occurrence): Promise<NearbyOccurrence | null> {
+    const rows = unwrap(
+      await getSupabase().rpc('team_possible_duplicate', { p_id: Number(occurrence.id) }),
+    ) as { occurrence_id: number; distance_meters: number }[]
+    const [candidate] = await resolveNearby(rows)
+    return candidate ?? null
+  },
+
+  async update(id: string, { status, forwardedTo, note }: TeamUpdate): Promise<void> {
+    unwrap(
+      await getSupabase().rpc('team_update_occurrence', {
+        p_id: Number(id),
+        p_status: status,
+        p_forwarded_to: forwardedTo ?? '',
+        p_note: note,
+      }),
+    )
+  },
+
   async markDuplicate(id: string, originalId: string): Promise<void> {
-    occurrenceStore.saveTeamChange(id, { moderation: 'duplicada', duplicateOf: originalId })
+    unwrap(
+      await getSupabase().rpc('team_mark_duplicate', {
+        p_id: Number(id),
+        p_original_id: Number(originalId),
+      }),
+    )
   },
 
   async dismissDuplicate(id: string, otherId: string): Promise<void> {
-    const dismissed = occurrenceStore.teamChange(id).dismissedDuplicates ?? []
-    occurrenceStore.saveTeamChange(id, { dismissedDuplicates: [...dismissed, otherId] })
-    const otherDismissed = occurrenceStore.teamChange(otherId).dismissedDuplicates ?? []
-    occurrenceStore.saveTeamChange(otherId, { dismissedDuplicates: [...otherDismissed, id] })
+    unwrap(
+      await getSupabase().rpc('team_dismiss_duplicate', {
+        p_id: Number(id),
+        p_other_id: Number(otherId),
+      }),
+    )
   },
 
   async markInvalid(id: string): Promise<void> {
-    occurrenceStore.saveTeamChange(id, { moderation: 'invalida' })
+    unwrap(await getSupabase().rpc('team_mark_invalid', { p_id: Number(id) }))
   },
 }

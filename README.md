@@ -15,15 +15,70 @@ npm run dev
 
 Abra http://localhost:5173.
 
-### Token do Mapbox
+### Variáveis de ambiente
 
-O mapa usa o Mapbox. Crie um arquivo `.env.local` na raiz (ele não vai para o git) com o token público da sua conta, o que começa com `pk.`:
+Crie um arquivo `.env.local` na raiz (ele não vai para o git), copiando o `.env.example`:
 
 ```
 VITE_MAPBOX_TOKEN=pk.seu_token
+VITE_SUPABASE_URL=https://seu-projeto.supabase.co
+VITE_SUPABASE_ANON_KEY=sua_chave_anon
 ```
 
-Depois de mudar o `.env.local`, reinicie o `npm run dev`. Sem token, o app funciona, mas a área do mapa mostra um aviso no lugar do mapa.
+- **Mapbox**: o token público da conta, o que começa com `pk.`. Sem ele, a área do mapa mostra um aviso.
+- **Supabase**: em _Project Settings → API_, a _Project URL_ e a chave _anon public_. Essa chave pode ir para o navegador; quem protege os dados são as regras do banco (RLS). A chave `service_role` **nunca** entra aqui.
+
+Depois de mudar o `.env.local`, reinicie o `npm run dev`.
+
+## Supabase
+
+O banco, as regras de acesso e as funções ficam em `supabase/migrations/`. As regras de segurança são testadas em `supabase/tests/database/rls.test.sql` (19 verificações).
+
+### Criar o projeto e aplicar o banco
+
+1. Em https://supabase.com/dashboard, crie um projeto (região South America · São Paulo, plano Free).
+2. Ligue a pasta ao projeto e envie as migrations (o `login` abre o navegador; o `ref` é o código na URL do projeto):
+
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref SEU_REF
+   npx supabase db push
+   ```
+
+3. Em _Authentication → Sign In / Providers_, ligue **Allow anonymous sign-ins** (é o que permite marcar sem se identificar) e deixe o **Email** ligado.
+4. Em _Authentication → URL Configuration_, coloque a URL do site em _Site URL_ e adicione `http://localhost:5173/**` em _Redirect URLs_ (e a URL da Vercel quando houver deploy).
+5. **Google (opcional)**: em _Authentication → Sign In / Providers → Google_, cole o Client ID e o Secret criados no Google Cloud Console (_APIs & Services → Credentials → OAuth client ID_, tipo Web, com o _Callback URL_ que o Supabase mostra). Enquanto não estiver ligado, o botão avisa que o Google ainda não funciona.
+
+### Liberar alguém na equipe
+
+A pessoa entra uma vez em `/entrar` com o e-mail dela. Depois, no _SQL Editor_ do Supabase:
+
+```sql
+insert into public.staff (user_id)
+select id from auth.users where email = 'pessoa@exemplo.com';
+```
+
+Para tirar da equipe, `delete from public.staff where user_id = (select id from auth.users where email = 'pessoa@exemplo.com');`.
+
+### Rodar o Supabase no próprio computador (opcional)
+
+Com o Docker Desktop aberto:
+
+```bash
+npx supabase start      # sobe banco, login e storage locais com os relatos de exemplo de supabase/seed.sql
+npx supabase test db    # roda os testes das regras de segurança
+```
+
+O `start` mostra a URL (`http://127.0.0.1:54321`) e a chave anon locais para colocar no `.env.local`.
+
+### O que o banco garante
+
+- Qualquer pessoa vê os relatos e os indicadores; ninguém vê quem marcou. Relatos inválidos somem para o público; duplicados continuam acessíveis pelo link e levam ao original.
+- Para marcar, confirmar ou denunciar é preciso uma sessão; sem login, o app abre uma sessão anônima automaticamente.
+- O morador não escolhe a situação nem edita o relato depois de enviar. Cada pessoa confirma uma vez.
+- No máximo 10 relatos por pessoa a cada 24 horas.
+- Só a equipe (tabela `staff`) muda situação, repassa, junta duplicados, marca inválido e lê denúncias, sempre por funções do banco.
+- Fotos vão para o bucket público `occurrence-photos`, até 5 MB, só imagem, cada pessoa na própria pasta.
 
 ## Scripts
 
@@ -40,7 +95,7 @@ Depois de mudar o `.env.local`, reinicie o `npm run dev`. Sem token, o app funci
 | Rota               | O que tem                                                                    |
 | ------------------ | ---------------------------------------------------------------------------- |
 | `/`                | Início: “Viu? Marca.”, como funciona, o que é e não é, encontros, quem faz   |
-| `/entrar`          | Entrar com Google, e-mail ou marcar sem se identificar (login ainda inativo) |
+| `/entrar`          | Entrar com link por e-mail, Google ou marcar sem se identificar              |
 | `/privacidade`     | Privacidade e LGPD (rascunho para revisão do grupo)                          |
 | `/termos`          | Termos de uso (rascunho para revisão do grupo)                               |
 | `/mapa`            | Mapa com os relatos, busca, filtros de categoria e situação, lista e detalhe |
@@ -55,22 +110,18 @@ Depois de mudar o `.env.local`, reinicie o `npm run dev`. Sem token, o app funci
 ## Como testar o que já existe
 
 1. **Mapa**: abra `/mapa`, filtre por categoria ou situação, busque um bairro e clique num pino ou num card da lista. Os filtros ficam na URL, então dá para compartilhar o link.
-2. **Marcar**: abra `/marcar`, escolha o ponto, a categoria e envie. O relato novo aparece no mapa com protocolo `#RES-0147` em diante. Marcando de novo no mesmo ponto e categoria, aparece o aviso de parecido.
+2. **Marcar**: abra `/marcar`, escolha o ponto, a categoria e envie. O relato novo aparece no mapa. Marcando de novo no mesmo ponto e categoria, aparece o aviso de parecido.
 3. **Detalhe**: em qualquer relato, use "Eu também vi", compartilhe ou denuncie.
 4. **Indicadores**: abra `/indicadores` e troque período, bairro e categoria.
-5. **Início e Entrar**: abra `/`, use o menu ☰ no celular e os atalhos "Como funciona" e "Encontros". Em `/entrar`, teste os três caminhos.
-6. **Equipe**: abra `/equipe`, clique em "Entrar como equipe", escolha um relato, mude a situação, escreva uma nota e salve. A nota aparece no andamento do detalhe. "Juntar os dois" transforma o mais novo em duplicado do mais antigo, e "Marcar inválido" tira o relato do mapa e dos números.
+5. **Início e Entrar**: abra `/`, use o menu ☰ no celular e os atalhos "Como funciona" e "Encontros". Em `/entrar`, peça o link por e-mail.
+6. **Equipe**: libere seu e-mail na equipe (veja acima), abra `/equipe`, escolha um relato, mude a situação, escreva uma nota e salve. A nota aparece no andamento do detalhe. "Juntar os dois" transforma o mais novo em duplicado do mais antigo, e "Marcar inválido" tira o relato do mapa e dos números.
 
-Para voltar ao estado inicial, limpe os dados do site no navegador (ou rode `localStorage.clear()` no console).
+## Limitações conhecidas
 
-## Limitações até a Etapa 8 (Supabase)
-
-- **Dados de exemplo**: o mapa usa 8 relatos do design. Os indicadores somam a eles 72 relatos gerados e mostram o selo "dados de exemplo". "Moradores cadastrados" é o número fixo do design (46).
-- **Tudo fica no navegador**: relatos novos, confirmações, denúncias e mudanças da equipe são guardados no `localStorage` de quem usa. Ninguém mais vê.
-- **Modo equipe sem senha**: o acesso a `/equipe` é só de demonstração.
-- **Fotos**: são reduzidas para no máximo 1280 px e convertidas para JPEG no próprio aparelho (isso tira o GPS escondido na foto), mas ainda não vão para nenhum servidor.
 - **Dias de encontro**: as datas em `src/domain/encounters.ts` são provisórias (24/10, 31/10, 07/11 e 14/11).
-- **Entrar**: Google e e-mail ainda não fazem login; mostram que o recurso chega em breve e sugerem marcar sem se identificar.
+- **"Moradores cadastrados"** conta as pessoas que marcaram ou confirmaram pelo menos um relato, inclusive sem se identificar.
+- **Fotos**: são reduzidas para no máximo 1280 px e convertidas para JPEG no próprio aparelho (isso tira o GPS escondido na foto). Ninguém borra rostos automaticamente: a equipe tira do ar o que precisar.
+- **Sessão anônima e login**: se alguém marca sem se identificar e depois entra com e-mail, os relatos anteriores ficam na sessão anônima.
 
 ## Pendências de conteúdo
 
@@ -83,7 +134,7 @@ Ficam em `src/domain/project.ts` e aparecem como `[placeholder]` nas telas até 
 
 ## Stack
 
-React + Vite + TypeScript, Tailwind CSS 4, React Router, Mapbox (`mapbox-gl` + `react-map-gl`) e zod. Os tokens de cor, fonte, raio e sombra do design ficam em `src/styles/index.css`, no bloco `@theme`.
+React + Vite + TypeScript, Tailwind CSS 4, React Router, Mapbox (`mapbox-gl` + `react-map-gl`), zod e Supabase (Postgres com PostGIS, Auth, Storage e RLS). Os tokens de cor, fonte, raio e sombra do design ficam em `src/styles/index.css`, no bloco `@theme`.
 
 ## Estrutura
 
@@ -91,15 +142,19 @@ React + Vite + TypeScript, Tailwind CSS 4, React Router, Mapbox (`mapbox-gl` + `
 src/
 ├─ app/          rotas e layouts (cabeçalhos desktop, navegação mobile)
 ├─ components/   marca, ícones e componentes reutilizados (botão, chip, pino…)
-├─ data/         repositórios (hoje com dados de exemplo; no futuro, Supabase)
+├─ data/         repositórios que falam com o Supabase
 ├─ domain/       tipos, categorias, situações e cálculos puros
 ├─ features/     uma pasta por funcionalidade (map, mark-problem, occurrence-detail, indicators, team)
-├─ lib/          utilitários (armazenamento, geocodificação, foto, media query)
+├─ lib/          utilitários (cliente do Supabase, geocodificação, foto, media query)
 ├─ pages/        uma tela por rota
 └─ styles/       tokens e estilos globais
+supabase/
+├─ migrations/   banco, regras de acesso, funções e storage
+├─ tests/        testes das regras de segurança
+└─ seed.sql      relatos de exemplo para o Supabase local
 ```
 
-A pasta `src/data/` é a única que sabe de onde vêm os dados. Na Etapa 8 ela passa a falar com o Supabase, sem mudar as telas. Tudo que depende do Mapbox fica em `src/features/map/engine/` e `src/lib/geocoding.ts`.
+A pasta `src/data/` é a única que sabe de onde vêm os dados: as telas não conhecem o Supabase. Tudo que depende do Mapbox fica em `src/features/map/engine/` e `src/lib/geocoding.ts`.
 
 ## Andamento
 
@@ -113,5 +168,5 @@ O projeto é construído em etapas, seguindo o briefing e o design no Claude Des
 - [x] Etapa 5 · Indicadores: metas, gráficos, filtros e CSV
 - [x] Etapa 6 · Painel da equipe: fila, situação, repasse, nota, duplicados e inválidos
 - [x] Etapa 7 · Início e Entrar: página inicial, menu do celular, tela de entrar, privacidade e termos
-- [ ] Etapa 8 · Supabase
+- [x] Etapa 8 · Supabase: banco com PostGIS, regras de acesso, login, fotos e painel da equipe de verdade
 - [ ] Etapa 9 · Testes e entrega

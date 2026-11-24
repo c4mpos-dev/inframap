@@ -1,10 +1,14 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router'
 import { AppIcon } from '@/components/brand/AppIcon'
 import { EmailSignInForm } from '@/features/sign-in/EmailSignInForm'
 import { SignInOptions } from '@/features/sign-in/SignInOptions'
 
 export default function SignInPage() {
   const [mode, setMode] = useState<'options' | 'email'>('options')
+  const [params] = useSearchParams()
+  const requested = params.get('voltar') ?? '/mapa'
+  const next = requested.startsWith('/') && !requested.startsWith('//') ? requested : '/mapa'
 
   return (
     <div className="flex flex-1 items-stretch justify-center bg-asfalto md:items-center md:bg-concreto md:p-10">
@@ -34,9 +38,9 @@ export default function SignInPage() {
             </p>
           </div>
           {mode === 'options' ? (
-            <SignInOptions onChooseEmail={() => setMode('email')} />
+            <SignInOptions next={next} onChooseEmail={() => setMode('email')} />
           ) : (
-            <EmailSignInForm onBack={() => setMode('options')} />
+            <EmailSignInForm next={next} onBack={() => setMode('options')} />
           )}
         </div>
       </div>

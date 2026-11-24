@@ -1,8 +1,8 @@
 import { TeamGate } from '@/features/team/components/TeamGate'
 import { TeamQueue } from '@/features/team/TeamQueue'
-import { useTeamMode } from '@/features/team/useTeamMode'
+import { useTeamAccess } from '@/features/team/useTeamAccess'
 
 export default function TeamPage() {
-  const { enabled, enter } = useTeamMode()
-  return enabled ? <TeamQueue /> : <TeamGate onEnter={enter} />
+  const { access, email } = useTeamAccess()
+  return access === 'staff' ? <TeamQueue /> : <TeamGate access={access} email={email} />
 }

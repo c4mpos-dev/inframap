@@ -1,27 +1,39 @@
 import { useId, useState, type FormEvent } from 'react'
 import { z } from 'zod'
+import { authRepo } from '@/data/session'
 
 const emailSchema = z.email()
 
 interface EmailSignInFormProps {
+  next: string
   onBack: () => void
 }
 
-export function EmailSignInForm({ onBack }: EmailSignInFormProps) {
+export function EmailSignInForm({ next, onBack }: EmailSignInFormProps) {
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState<{ tone: 'error' | 'info'; text: string } | null>(null)
+  const [sending, setSending] = useState(false)
   const messageId = useId()
 
-  function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    if (!emailSchema.safeParse(email.trim()).success) {
+    const address = email.trim()
+    if (!emailSchema.safeParse(address).success) {
       setMessage({ tone: 'error', text: 'Confira o e-mail: parece que falta alguma coisa.' })
       return
     }
-    setMessage({
-      tone: 'info',
-      text: 'O link por e-mail chega em breve. Por enquanto, dá para marcar sem se identificar.',
-    })
+    setSending(true)
+    try {
+      await authRepo.sendMagicLink(address, next)
+      setMessage({
+        tone: 'info',
+        text: `Pronto! Mandamos o link para ${address}. Abra no celular ou no computador.`,
+      })
+    } catch (error) {
+      setMessage({ tone: 'error', text: (error as Error).message })
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -42,9 +54,10 @@ export function EmailSignInForm({ onBack }: EmailSignInFormProps) {
       </label>
       <button
         type="submit"
+        disabled={sending}
         className="h-13 rounded-[14px] bg-faixa text-base font-extrabold text-asfalto"
       >
-        Mandar link de acesso
+        {sending ? 'Mandando…' : 'Mandar link de acesso'}
       </button>
       {message ? (
         <p

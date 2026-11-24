@@ -1,19 +1,29 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { StrokeIcon } from '@/components/icons/StrokeIcon'
+import { authRepo } from '@/data/session'
 
 interface SignInOptionsProps {
+  next: string
   onChooseEmail: () => void
 }
 
-export function SignInOptions({ onChooseEmail }: SignInOptionsProps) {
-  const [googleNotice, setGoogleNotice] = useState(false)
+export function SignInOptions({ next, onChooseEmail }: SignInOptionsProps) {
+  const [googleError, setGoogleError] = useState<string | null>(null)
+
+  async function continueWithGoogle() {
+    try {
+      await authRepo.signInWithGoogle(next)
+    } catch (error) {
+      setGoogleError((error as Error).message)
+    }
+  }
 
   return (
     <div className="flex animate-rise flex-col gap-2.5">
       <button
         type="button"
-        onClick={() => setGoogleNotice(true)}
+        onClick={continueWithGoogle}
         className="flex h-13.5 items-center justify-center gap-2.5 rounded-[14px] bg-concreto text-base font-bold text-asfalto"
       >
         <span
@@ -24,9 +34,9 @@ export function SignInOptions({ onChooseEmail }: SignInOptionsProps) {
         </span>
         Continuar com Google
       </button>
-      {googleNotice && (
-        <p role="status" className="text-[13px] text-poeira">
-          O login com Google chega em breve. Por enquanto, dá para marcar sem se identificar.
+      {googleError && (
+        <p role="alert" className="text-[13px] text-poeira">
+          {googleError} Por enquanto, dá para entrar com e-mail ou marcar sem se identificar.
         </p>
       )}
       <button

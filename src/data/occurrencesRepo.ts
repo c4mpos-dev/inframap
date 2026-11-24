@@ -1,54 +1,74 @@
-import { distanceInMeters } from '@/domain/geo'
 import type { CategoryId, LatLng, NewOccurrence, Occurrence, ReportReason } from '@/domain/types'
-import { readStorage, writeStorage } from '@/lib/storage'
-import { firstProtocolNumber, formatProtocol } from './mock/occurrences'
-import { occurrenceStore } from './occurrenceStore'
-
-const REPORTS_KEY = 'inframap:content-reports'
-
-export interface ContentReport {
-  occurrenceId: string
-  reason: ReportReason
-  details: string
-  createdAt: string
-}
+import { getSupabase, unwrap } from '@/lib/supabaseClient'
+import {
+  OCCURRENCE_COLUMNS,
+  PHOTO_BUCKET,
+  toOccurrence,
+  type EventRow,
+  type OccurrenceRow,
+} from './occurrenceRows'
+import { ensureSession } from './session'
 
 export interface NearbyOccurrence {
   occurrence: Occurrence
   distanceMeters: number
 }
 
-export function findNearbyAmong(
-  occurrences: Occurrence[],
-  location: LatLng,
-  categoryId: CategoryId,
-  radiusMeters: number,
-  excludeId?: string,
-): NearbyOccurrence[] {
-  return occurrences
-    .filter(
-      (item) =>
-        item.id !== excludeId && item.categoryId === categoryId && item.status !== 'resolvida',
-    )
-    .map((occurrence) => ({
-      occurrence,
-      distanceMeters: distanceInMeters(location, occurrence.location),
-    }))
-    .filter((candidate) => candidate.distanceMeters <= radiusMeters)
-    .sort((a, b) => a.distanceMeters - b.distanceMeters)
+interface NearbyRow {
+  occurrence_id: number
+  distance_meters: number
 }
 
-export function readContentReports(): ContentReport[] {
-  return readStorage<ContentReport[]>(REPORTS_KEY, [])
+const publicOccurrences = () => getSupabase().from('occurrences_public').select(OCCURRENCE_COLUMNS)
+
+async function fetchByIds(ids: number[]): Promise<Map<number, Occurrence>> {
+  if (ids.length === 0) return new Map()
+  const rows = unwrap(await publicOccurrences().in('id', ids)) as OccurrenceRow[]
+  return new Map(rows.map((row) => [row.id, toOccurrence(row)]))
+}
+
+export async function resolveNearby(rows: NearbyRow[]): Promise<NearbyOccurrence[]> {
+  const occurrences = await fetchByIds(rows.map((row) => row.occurrence_id))
+  return rows.flatMap((row) => {
+    const occurrence = occurrences.get(row.occurrence_id)
+    return occurrence ? [{ occurrence, distanceMeters: row.distance_meters }] : []
+  })
+}
+
+async function uploadPhoto(dataUrl: string, userId: string): Promise<string> {
+  const blob = await (await fetch(dataUrl)).blob()
+  const path = `${userId}/${crypto.randomUUID()}.jpg`
+  unwrap(
+    await getSupabase()
+      .storage.from(PHOTO_BUCKET)
+      .upload(path, blob, { contentType: 'image/jpeg' }),
+  )
+  return path
 }
 
 export const occurrencesRepo = {
   async list(): Promise<Occurrence[]> {
-    return occurrenceStore.visible().sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    const rows = unwrap(
+      await publicOccurrences().is('moderation', null).order('created_at', { ascending: false }),
+    ) as OccurrenceRow[]
+    return rows.map((row) => toOccurrence(row))
   },
 
   async get(id: string): Promise<Occurrence | null> {
-    return occurrenceStore.find(id)
+    const numericId = Number(id)
+    if (!Number.isInteger(numericId)) return null
+    const row = unwrap(
+      await publicOccurrences().eq('id', numericId).maybeSingle(),
+    ) as OccurrenceRow | null
+    if (!row) return null
+    const events = unwrap(
+      await getSupabase()
+        .from('status_events')
+        .select('kind, note, created_at')
+        .eq('occurrence_id', numericId)
+        .order('created_at'),
+    ) as EventRow[]
+    return toOccurrence(row, events)
   },
 
   async listNearby(
@@ -57,7 +77,16 @@ export const occurrencesRepo = {
     radiusMeters: number,
     excludeId?: string,
   ): Promise<NearbyOccurrence[]> {
-    return findNearbyAmong(occurrenceStore.visible(), location, categoryId, radiusMeters, excludeId)
+    const rows = unwrap(
+      await getSupabase().rpc('nearby_occurrences', {
+        p_lat: location.lat,
+        p_lng: location.lng,
+        p_category: categoryId,
+        p_radius_meters: radiusMeters,
+        p_exclude: excludeId ? Number(excludeId) : null,
+      }),
+    ) as NearbyRow[]
+    return resolveNearby(rows)
   },
 
   async findNearby(
@@ -70,33 +99,52 @@ export const occurrencesRepo = {
   },
 
   async report(occurrenceId: string, reason: ReportReason, details: string): Promise<void> {
-    const report = { occurrenceId, reason, details, createdAt: new Date().toISOString() }
-    writeStorage(REPORTS_KEY, [...readContentReports(), report])
+    await ensureSession()
+    unwrap(
+      await getSupabase()
+        .from('content_reports')
+        .insert({ occurrence_id: Number(occurrenceId), reason, details }),
+    )
   },
 
   async create(input: NewOccurrence): Promise<Occurrence> {
-    const sequence = firstProtocolNumber + occurrenceStore.all().length
-    const occurrence: Occurrence = {
-      ...input,
-      id: String(sequence),
-      protocol: formatProtocol(sequence),
-      status: 'aberta',
-      createdAt: new Date().toISOString(),
-      confirmations: 0,
-      confirmedByMe: false,
-      events: [],
-      forwardedTo: null,
-      moderation: null,
-      duplicateOf: null,
-    }
-    occurrenceStore.addCreated(occurrence)
+    const session = await ensureSession()
+    const photoPath = input.photoUrl ? await uploadPhoto(input.photoUrl, session.user.id) : null
+    const created = unwrap(
+      await getSupabase()
+        .from('occurrences')
+        .insert({
+          category_id: input.categoryId,
+          title: input.title,
+          description: input.description,
+          neighborhood: input.neighborhood,
+          location: `SRID=4326;POINT(${input.location.lng} ${input.location.lat})`,
+          photo_path: photoPath,
+          anonymous: input.anonymous,
+        })
+        .select('id')
+        .single(),
+    ) as { id: number }
+    const occurrence = await occurrencesRepo.get(String(created.id))
+    if (!occurrence) throw new Error('O relato foi enviado, mas não deu para abrir agora.')
     return occurrence
   },
 
   async confirm(id: string): Promise<Occurrence> {
-    occurrenceStore.toggleConfirmed(id)
-    const occurrence = occurrenceStore.find(id)
-    if (!occurrence) throw new Error(`Ocorrência não encontrada: ${id}`)
-    return occurrence
+    const session = await ensureSession()
+    const current = await occurrencesRepo.get(id)
+    if (!current) throw new Error('Esse relato não existe mais.')
+    const confirmations = getSupabase().from('confirmations')
+    unwrap(
+      current.confirmedByMe
+        ? await confirmations
+            .delete()
+            .eq('occurrence_id', Number(id))
+            .eq('user_id', session.user.id)
+        : await confirmations.insert({ occurrence_id: Number(id) }),
+    )
+    const updated = await occurrencesRepo.get(id)
+    if (!updated) throw new Error('Esse relato não existe mais.')
+    return updated
   },
 }

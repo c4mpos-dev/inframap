@@ -1,4 +1,4 @@
-import type { CategoryId, Occurrence, StatusId } from '@/domain/types'
+import type { CategoryId, Occurrence, OccurrenceEventKind, StatusId } from '@/domain/types'
 
 interface Seed {
   categoryId: CategoryId
@@ -10,6 +10,13 @@ interface Seed {
   lng: number
   daysAgo: number
   confirmations: number
+  events?: SeedEvent[]
+}
+
+interface SeedEvent {
+  kind: OccurrenceEventKind
+  hoursAfter: number
+  note?: string
 }
 
 const seeds: Seed[] = [
@@ -23,6 +30,7 @@ const seeds: Seed[] = [
     lng: -44.4505,
     daysAgo: 2,
     confirmations: 14,
+    events: [{ kind: 'confirmada', hoursAfter: 10 }],
   },
   {
     categoryId: 'calcadas',
@@ -34,6 +42,14 @@ const seeds: Seed[] = [
     lng: -44.4474,
     daysAgo: 5,
     confirmations: 9,
+    events: [
+      { kind: 'confirmada', hoursAfter: 20 },
+      {
+        kind: 'andamento',
+        hoursAfter: 50,
+        note: 'Repassada à secretaria de obras junto com outros relatos do bairro.',
+      },
+    ],
   },
   {
     categoryId: 'saneamento',
@@ -45,6 +61,7 @@ const seeds: Seed[] = [
     lng: -44.4551,
     daysAgo: 1,
     confirmations: 21,
+    events: [{ kind: 'confirmada', hoursAfter: 6 }],
   },
   {
     categoryId: 'sinalizacao',
@@ -56,6 +73,15 @@ const seeds: Seed[] = [
     lng: -44.4575,
     daysAgo: 14,
     confirmations: 6,
+    events: [
+      { kind: 'confirmada', hoursAfter: 18 },
+      { kind: 'andamento', hoursAfter: 40, note: 'Repassada ao setor de trânsito da prefeitura.' },
+      {
+        kind: 'resolvida',
+        hoursAfter: 200,
+        note: 'A placa foi recolocada. A equipe conferiu no local.',
+      },
+    ],
   },
   {
     categoryId: 'iluminacao',
@@ -67,6 +93,14 @@ const seeds: Seed[] = [
     lng: -44.4362,
     daysAgo: 3,
     confirmations: 11,
+    events: [
+      { kind: 'confirmada', hoursAfter: 13 },
+      {
+        kind: 'andamento',
+        hoursAfter: 43,
+        note: 'Repassada à concessionária de energia junto com outros relatos do bairro.',
+      },
+    ],
   },
   {
     categoryId: 'sinalizacao',
@@ -89,6 +123,7 @@ const seeds: Seed[] = [
     lng: -44.494,
     daysAgo: 4,
     confirmations: 17,
+    events: [{ kind: 'confirmada', hoursAfter: 15 }],
   },
   {
     categoryId: 'vias',
@@ -100,8 +135,14 @@ const seeds: Seed[] = [
     lng: -44.4806,
     daysAgo: 31,
     confirmations: 3,
+    events: [
+      { kind: 'andamento', hoursAfter: 30, note: 'Repassada à secretaria de obras.' },
+      { kind: 'resolvida', hoursAfter: 500, note: 'Buraco tapado. A equipe conferiu no local.' },
+    ],
   },
 ]
+
+const HOUR_MS = 60 * 60 * 1000
 
 export const firstProtocolNumber = 139
 
@@ -123,6 +164,11 @@ export function buildMockOccurrences(now: Date = new Date()): Occurrence[] {
       confirmedByMe: false,
       photoUrl: null,
       anonymous: true,
+      events: (seed.events ?? []).map((event) => ({
+        kind: event.kind,
+        at: new Date(createdAt.getTime() + event.hoursAfter * HOUR_MS).toISOString(),
+        note: event.note ?? null,
+      })),
     }
   })
 }

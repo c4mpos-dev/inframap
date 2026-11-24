@@ -17,3 +17,16 @@ export function formatRelativeDay(isoDate: string, now: Date = new Date()): stri
 function startOfDay(date: Date): number {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime()
 }
+
+const shortDate = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'short' })
+const shortTime = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit' })
+
+export function formatEventDate(isoDate: string): string {
+  const date = new Date(isoDate)
+  return `${shortDate.format(date).replace('.', '').replace(' de ', ' ')} · ${shortTime.format(date)}`
+}
+
+export function formatDistance(meters: number): string {
+  if (meters < 1000) return `${Math.max(1, Math.round(meters / 10) * 10)} m`
+  return `${(meters / 1000).toFixed(1).replace('.', ',')} km`
+}

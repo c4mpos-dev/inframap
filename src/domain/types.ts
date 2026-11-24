@@ -8,6 +8,16 @@ export interface LatLng {
   lng: number
 }
 
+export type OccurrenceEventKind = 'confirmada' | 'andamento' | 'resolvida'
+
+export interface OccurrenceEvent {
+  kind: OccurrenceEventKind
+  at: string
+  note: string | null
+}
+
+export type ReportReason = 'dados_pessoais' | 'ofensivo' | 'nao_e_infraestrutura' | 'outro'
+
 export interface Occurrence {
   id: string
   protocol: string
@@ -22,6 +32,7 @@ export interface Occurrence {
   confirmedByMe: boolean
   photoUrl: string | null
   anonymous: boolean
+  events: OccurrenceEvent[]
 }
 
 export interface NewOccurrence {

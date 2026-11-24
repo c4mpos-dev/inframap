@@ -45,6 +45,37 @@
   --animate-pin-land: pin-land 0.9s cubic-bezier(0.5, 0, 0.5, 1) both;
   --animate-crack: crack 0.8s 0.9s ease-out both;
   --animate-ring: ring 1.6s 0.7s ease-out infinite;
+  --animate-pop: pop 0.35s ease-out;
+  --animate-grow-down: grow-down 0.8s 0.2s ease-out both;
+  --animate-live: live 1.8s ease-out infinite;
+
+  @keyframes pop {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    40% {
+      transform: scale(1.08);
+    }
+  }
+
+  @keyframes grow-down {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  @keyframes live {
+    0% {
+      box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 50%, transparent);
+    }
+    100% {
+      box-shadow: 0 0 0 12px transparent;
+    }
+  }
 
   @keyframes float {
     0%,

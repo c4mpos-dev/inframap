@@ -1,10 +1,18 @@
 import { distanceInMeters } from '@/domain/geo'
-import type { CategoryId, LatLng, NewOccurrence, Occurrence } from '@/domain/types'
+import type { CategoryId, LatLng, NewOccurrence, Occurrence, ReportReason } from '@/domain/types'
 import { readStorage, writeStorage } from '@/lib/storage'
 import { buildMockOccurrences, firstProtocolNumber, formatProtocol } from './mock/occurrences'
 
 const CREATED_KEY = 'inframap:created-occurrences'
 const CONFIRMED_KEY = 'inframap:confirmed-occurrences'
+const REPORTS_KEY = 'inframap:content-reports'
+
+export interface ContentReport {
+  occurrenceId: string
+  reason: ReportReason
+  details: string
+  createdAt: string
+}
 
 export interface NearbyOccurrence {
   occurrence: Occurrence
@@ -22,6 +30,7 @@ function allOccurrences(): Occurrence[] {
       confirmedByMe,
       confirmations: occurrence.confirmations + (confirmedByMe ? 1 : 0),
       location: { ...occurrence.location },
+      events: occurrence.events ?? [],
     }
   })
 }
@@ -41,20 +50,38 @@ export const occurrencesRepo = {
     return allOccurrences().find((item) => item.id === id) ?? null
   },
 
-  async findNearby(
+  async listNearby(
     location: LatLng,
     categoryId: CategoryId,
     radiusMeters: number,
-  ): Promise<NearbyOccurrence | null> {
-    const candidates = allOccurrences()
-      .filter((item) => item.categoryId === categoryId && item.status !== 'resolvida')
+    excludeId?: string,
+  ): Promise<NearbyOccurrence[]> {
+    return allOccurrences()
+      .filter(
+        (item) =>
+          item.id !== excludeId && item.categoryId === categoryId && item.status !== 'resolvida',
+      )
       .map((occurrence) => ({
         occurrence,
         distanceMeters: distanceInMeters(location, occurrence.location),
       }))
       .filter((candidate) => candidate.distanceMeters <= radiusMeters)
       .sort((a, b) => a.distanceMeters - b.distanceMeters)
-    return candidates[0] ?? null
+  },
+
+  async findNearby(
+    location: LatLng,
+    categoryId: CategoryId,
+    radiusMeters: number,
+  ): Promise<NearbyOccurrence | null> {
+    const [closest] = await occurrencesRepo.listNearby(location, categoryId, radiusMeters)
+    return closest ?? null
+  },
+
+  async report(occurrenceId: string, reason: ReportReason, details: string): Promise<void> {
+    const reports = readStorage<ContentReport[]>(REPORTS_KEY, [])
+    const report = { occurrenceId, reason, details, createdAt: new Date().toISOString() }
+    writeStorage(REPORTS_KEY, [...reports, report])
   },
 
   async create(input: NewOccurrence): Promise<Occurrence> {
@@ -67,6 +94,7 @@ export const occurrencesRepo = {
       createdAt: new Date().toISOString(),
       confirmations: 0,
       confirmedByMe: false,
+      events: [],
     }
     createdOccurrences = [...createdOccurrences, occurrence]
     writeStorage(CREATED_KEY, createdOccurrences)

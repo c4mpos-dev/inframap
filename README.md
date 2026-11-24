@@ -173,7 +173,5 @@ O projeto se apoia no Objetivo de Desenvolvimento Sustentável 9.1 da ONU: infra
 <p align="center">
   <a href="https://inframap-g3.vercel.app"><b>Abrir o InfraMap</b></a>
   &nbsp;·&nbsp;
-  <a href="docs/desenvolvimento.md">Guia para quem programa</a>
-  &nbsp;·&nbsp;
   <a href="https://inframap-g3.vercel.app/privacidade">Privacidade</a>
 </p>

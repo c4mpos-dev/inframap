@@ -47,7 +47,7 @@ O banco, as regras de acesso e as funções ficam em `supabase/migrations/`. As 
 
    Sem `--remote`, o `db push` grava no banco local do Docker, não na nuvem. O seed (relatos de exemplo) não vai para a nuvem.
 
-3. Em _Authentication → Sign In / Providers_, ligue **Allow anonymous sign-ins** (é o que permite marcar sem se identificar) e deixe o **Email** ligado.
+3. Em _Authentication → Sign In / Providers_, deixe **Allow anonymous sign-ins desligado**, **Confirm email** ligado e, em _Email_, o **Email OTP length** em `6`.
 4. Em _Authentication → URL Configuration_, coloque a URL do site em _Site URL_ e adicione `http://localhost:5173/**` em _Redirect URLs_ (e a URL da Vercel quando houver deploy).
 5. **Google**: no Google Cloud (projeto `inframap-515715`), crie um _OAuth client ID_ do tipo Web com a origem do site (`http://localhost:5173` e a URL da Vercel) e o redirect `https://<ref>.supabase.co/auth/v1/callback`. Em _Authentication → Sign In / Providers → Google_, cole o Client ID e o Client Secret. Enquanto o app estiver em modo de teste no Google, só entra quem estiver na lista de usuários de teste.
 
@@ -57,10 +57,10 @@ O e-mail padrão do Supabase só manda para quem é membro do projeto, no máxim
 
 1. No Resend, crie uma API key com _Sending access_ só para esse domínio.
 2. Em _Authentication → Emails → SMTP Settings_, ligue o SMTP próprio: remetente `inframap@send.cauacampos.dev`, nome `InfraMap`, host `smtp.resend.com`, porta `465`, usuário `resend` e a API key como senha.
-3. Em _Authentication → Emails → Templates_, cole `supabase/templates/confirmation.html` em _Confirm sign up_ (assunto "Confirme seu cadastro no InfraMap") e `supabase/templates/magic_link.html` em _Magic link or OTP_ (assunto "Seu link para entrar no InfraMap").
+3. Em _Authentication → Emails → Templates_, cole `supabase/templates/confirmation.html` em _Confirm sign up_ (assunto "Confirme seu cadastro no InfraMap") e `supabase/templates/magic_link.html` em _Magic link or OTP_ (assunto "Seu código para entrar no InfraMap").
 4. Deixe _Confirm email_ ligado em _Sign In / Providers_.
 
-Na primeira vez, a pessoa recebe "Confirme seu cadastro"; nas seguintes, "Seu link para entrar". No Supabase local os dois templates já vêm ligados pelo `config.toml` e aparecem no Mailpit (http://127.0.0.1:54324).
+Os dois e-mails mandam um **código de 6 números** (não um link): no celular, o link costuma abrir no navegador do app de e-mail e a pessoa fica logada no lugar errado; o código ela digita na mesma tela. Na primeira vez chega "Confirme seu cadastro"; nas seguintes, "Seu código para entrar". No Supabase local os dois templates já vêm ligados pelo `config.toml` e aparecem no Mailpit (http://127.0.0.1:54324).
 
 ### Liberar alguém na equipe
 
@@ -87,7 +87,8 @@ O `start` mostra a URL (`http://127.0.0.1:54321`) e a chave anon locais para col
 ### O que o banco garante
 
 - Qualquer pessoa vê os relatos e os indicadores; ninguém vê quem marcou. Relatos inválidos somem para o público; duplicados continuam acessíveis pelo link e levam ao original.
-- Para marcar, confirmar ou denunciar é preciso uma sessão; sem login, o app abre uma sessão anônima automaticamente.
+- Ver o mapa, os relatos e os indicadores não exige conta. Para marcar, confirmar, denunciar ou enviar foto é preciso uma **conta confirmada** (código no e-mail ou Google): sessões anônimas são recusadas pelo próprio banco, mesmo que alguém religue o login anônimo.
+- Cada conta tem um perfil com o nome. No relato público aparece só o primeiro nome e a inicial ("Maria S."), ou "Morador(a) de Resende" quando a pessoa oculta o nome naquele relato.
 - O morador não escolhe a situação nem edita o relato depois de enviar. Cada pessoa confirma uma vez.
 - No máximo 10 relatos por pessoa a cada 24 horas.
 - Só a equipe (tabela `staff`) muda situação, repassa, junta duplicados, marca inválido e lê denúncias, sempre por funções do banco.
@@ -109,7 +110,7 @@ O `start` mostra a URL (`http://127.0.0.1:54321`) e a chave anon locais para col
 | Rota               | O que tem                                                                    |
 | ------------------ | ---------------------------------------------------------------------------- |
 | `/`                | Início: “Viu? Marca.”, como funciona, o que é e não é, encontros, quem faz   |
-| `/entrar`          | Entrar com link por e-mail, Google ou marcar sem se identificar              |
+| `/entrar`          | Entrar com Google ou com código no e-mail; no primeiro acesso, pede o nome   |
 | `/privacidade`     | Privacidade e LGPD (rascunho para revisão do grupo)                          |
 | `/termos`          | Termos de uso (rascunho para revisão do grupo)                               |
 | `/mapa`            | Mapa com os relatos, busca, filtros de categoria e situação, lista e detalhe |
@@ -119,7 +120,7 @@ O `start` mostra a URL (`http://127.0.0.1:54321`) e a chave anon locais para col
 | `/equipe`          | Painel da equipe: fila, situação, repasse, nota, duplicados e inválidos      |
 | `/dev/componentes` | Vitrine dos componentes (só em desenvolvimento)                              |
 
-`/perfil` mostra nome, e-mail e foto de quem entrou (Google ou e-mail) e o botão de sair; no cabeçalho do computador, "Entrar" vira o nome da pessoa. `/meus-relatos` ainda é uma tela vazia.
+`/perfil` mostra nome, e-mail e foto, deixa trocar o nome e sair; no cabeçalho do computador, "Entrar" vira o nome da pessoa. `/meus-relatos` lista os relatos da própria conta. `/marcar` e `/meus-relatos` levam para `/entrar` quem não entrou, e "Eu também vi" e "Denunciar" fazem o mesmo; depois de entrar, a pessoa volta para onde estava.
 
 ## Como testar o que já existe
 
@@ -127,7 +128,7 @@ O `start` mostra a URL (`http://127.0.0.1:54321`) e a chave anon locais para col
 2. **Marcar**: abra `/marcar`, escolha o ponto, a categoria e envie. O relato novo aparece no mapa. Marcando de novo no mesmo ponto e categoria, aparece o aviso de parecido.
 3. **Detalhe**: em qualquer relato, use "Eu também vi", compartilhe ou denuncie.
 4. **Indicadores**: abra `/indicadores` e troque período, bairro e categoria.
-5. **Início e Entrar**: abra `/`, use o menu ☰ no celular e os atalhos "Como funciona" e "Encontros". Em `/entrar`, peça o link por e-mail.
+5. **Início e Entrar**: abra `/`, use o menu ☰ no celular e os atalhos "Como funciona" e "Encontros". Em `/entrar`, peça o código por e-mail, digite e escolha o nome.
 6. **Equipe**: libere seu e-mail na equipe (veja acima), abra `/equipe`, escolha um relato, mude a situação, escreva uma nota e salve. A nota aparece no andamento do detalhe. "Juntar os dois" transforma o mais novo em duplicado do mais antigo, e "Marcar inválido" tira o relato do mapa e dos números.
 
 ## Testes e verificações
@@ -141,9 +142,8 @@ O `start` mostra a URL (`http://127.0.0.1:54321`) e a chave anon locais para col
 ## Limitações conhecidas
 
 - **Dias de encontro**: as datas em `src/domain/encounters.ts` são provisórias (24/10, 31/10, 07/11 e 14/11).
-- **"Moradores cadastrados"** conta as pessoas que marcaram ou confirmaram pelo menos um relato, inclusive sem se identificar.
+- **"Cadastros"** nos indicadores conta as contas confirmadas, sem contar a equipe.
 - **Fotos**: são reduzidas para no máximo 1280 px e convertidas para JPEG no próprio aparelho (isso tira o GPS escondido na foto). Ninguém borra rostos automaticamente: a equipe tira do ar o que precisar.
-- **Sessão anônima e login**: se alguém marca sem se identificar e depois entra com e-mail, os relatos anteriores ficam na sessão anônima.
 
 ## Pendências de conteúdo
 

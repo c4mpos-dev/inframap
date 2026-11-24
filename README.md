@@ -91,6 +91,7 @@ O `start` mostra a URL (`http://127.0.0.1:54321`) e a chave anon locais para col
 | `npm run lint`      | ESLint                        |
 | `npm run typecheck` | TypeScript sem gerar arquivos |
 | `npm run format`    | Formata tudo com Prettier     |
+| `npm test`          | Testes da lógica (Vitest)     |
 
 ## Telas
 
@@ -117,6 +118,14 @@ O `start` mostra a URL (`http://127.0.0.1:54321`) e a chave anon locais para col
 4. **Indicadores**: abra `/indicadores` e troque período, bairro e categoria.
 5. **Início e Entrar**: abra `/`, use o menu ☰ no celular e os atalhos "Como funciona" e "Encontros". Em `/entrar`, peça o link por e-mail.
 6. **Equipe**: libere seu e-mail na equipe (veja acima), abra `/equipe`, escolha um relato, mude a situação, escreva uma nota e salve. A nota aparece no andamento do detalhe. "Juntar os dois" transforma o mais novo em duplicado do mais antigo, e "Marcar inválido" tira o relato do mapa e dos números.
+
+## Testes e verificações
+
+- **Lógica** (`npm test`): andamento do relato, indicadores, filtros do mapa, validação do formulário de marcar, título automático, CSV, protocolo, distâncias e datas. Os testes ficam ao lado de cada arquivo (`*.test.ts`).
+- **Banco** (`npx supabase test db`, com o Supabase local rodando): regras de segurança em pgTAP.
+- **Fluxos à mão, contra o Supabase na nuvem**: marcar com foto, confirmar, denunciar e indicadores. Login por e-mail e painel da equipe foram testados no Supabase local.
+- **Acessibilidade**: todas as telas passam no axe (WCAG 2.1 AA) no celular e no computador. Dá para usar só com teclado: "Pular para o conteúdo" no primeiro Tab, pinos do mapa abrem com Enter e fecham com Esc, o foco vai para o título de cada passo ao marcar e volta ao botão quando um painel fecha. Cada tela tem título próprio na aba, e ao trocar de tela o foco vai para o conteúdo, para o leitor de tela começar do topo.
+- **Celular de entrada** (tela de 360 px, build de produção): nenhuma tela passa da largura. O início baixa cerca de 120 KB; o Mapbox (cerca de 530 KB comprimido) só carrega nas telas com mapa. As fotos saem do aparelho com no máximo 1280 px, em JPEG.
 
 ## Limitações conhecidas
 
@@ -152,7 +161,7 @@ src/
 └─ styles/       tokens e estilos globais
 supabase/
 ├─ migrations/   banco, regras de acesso, funções e storage
-├─ tests/        testes das regras de segurança
+├─ tests/        testes das regras de segurança (pgTAP)
 └─ seed.sql      relatos de exemplo para o Supabase local
 ```
 
@@ -172,3 +181,6 @@ O projeto é construído em etapas, seguindo o briefing e o design no Claude Des
 - [x] Etapa 7 · Início e Entrar: página inicial, menu do celular, tela de entrar, privacidade e termos
 - [x] Etapa 8 · Supabase: banco com PostGIS, regras de acesso, login, fotos e painel da equipe de verdade
 - [ ] Etapa 9 · Testes e entrega
+  - [x] Testes da lógica, fluxos principais, acessibilidade e celular de entrada
+  - [ ] Formulários SUS e NPS
+  - [ ] Deploy na Vercel

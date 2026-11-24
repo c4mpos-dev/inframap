@@ -1,0 +1,29 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        background: transparent;
+      }
+      img {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Renders ../../public/<name>.svg full-bleed; the window size sets the PNG size. -->
+    <img id="icon" alt="" />
+    <script>
+      const name = new URLSearchParams(location.search).get('svg') || 'icon'
+      document.getElementById('icon').src = `../../public/${name}.svg`
+    </script>
+  </body>
+</html>

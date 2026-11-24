@@ -12,7 +12,7 @@ import { getSupabase } from '@/lib/supabaseClient'
 export const PHOTO_BUCKET = 'occurrence-photos'
 
 export const OCCURRENCE_COLUMNS =
-  'id, category_id, status, title, description, neighborhood, lat, lng, photo_path, anonymous, forwarded_to, moderation, duplicate_of, confirmations_count, confirmed_by_me, created_at'
+  'id, category_id, status, title, description, neighborhood, lat, lng, photo_path, anonymous, forwarded_to, moderation, duplicate_of, confirmations_count, confirmed_by_me, created_at, author_name'
 
 export interface OccurrenceRow {
   id: number
@@ -31,6 +31,7 @@ export interface OccurrenceRow {
   confirmations_count: number
   confirmed_by_me: boolean
   created_at: string
+  author_name: string | null
 }
 
 export interface EventRow {
@@ -59,6 +60,7 @@ export function toOccurrence(row: OccurrenceRow, events: EventRow[] = []): Occur
     confirmedByMe: row.confirmed_by_me,
     photoUrl: photoUrl(row.photo_path),
     anonymous: row.anonymous,
+    authorName: row.author_name,
     events: events.map((event): OccurrenceEvent => ({
       kind: event.kind,
       at: event.created_at,

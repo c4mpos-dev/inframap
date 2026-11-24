@@ -34,6 +34,8 @@ export interface Occurrence {
   confirmedByMe: boolean
   photoUrl: string | null
   anonymous: boolean
+  /** Public label like "Cauã C."; null when hidden or unknown. */
+  authorName: string | null
   events: OccurrenceEvent[]
   forwardedTo: string | null
   moderation: Moderation | null

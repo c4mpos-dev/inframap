@@ -2,6 +2,7 @@ import { Navigate, useNavigate, useParams } from 'react-router'
 import { Toast } from '@/components/ui/Toast'
 import { useToast } from '@/components/ui/useToast'
 import { useOccurrences } from '@/data/useOccurrences'
+import { useAccountGuard } from '@/features/auth/useAccountGuard'
 import { MapView } from '@/features/map/engine/MapView'
 import { DetailLoading, DetailMissing } from '@/features/occurrence-detail/components/DetailStates'
 import { OccurrenceDetail } from '@/features/occurrence-detail/OccurrenceDetail'
@@ -28,6 +29,7 @@ export default function OccurrencePage() {
   const isDesktop = useIsDesktop()
   const { state, toggleConfirmation } = useOccurrenceDetail(id)
   const { toast, showToast } = useToast()
+  const guard = useAccountGuard()
 
   if (state.status === 'merged') return <Navigate to={`/ocorrencia/${state.originalId}`} replace />
 
@@ -41,7 +43,7 @@ export default function OccurrencePage() {
         key={state.occurrence.id}
         occurrence={state.occurrence}
         nearby={state.nearby}
-        onToggleConfirmation={toggleConfirmation}
+        onToggleConfirmation={() => guard(toggleConfirmation)}
         onNotify={showToast}
       />
     )

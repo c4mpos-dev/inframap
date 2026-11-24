@@ -23,7 +23,7 @@ export const indicatorsRepo = {
     const supabase = getSupabase()
     const [rows, residents] = await Promise.all([
       supabase.from('indicator_records').select('*'),
-      supabase.rpc('participating_residents'),
+      supabase.rpc('registered_residents'),
     ])
     return {
       records: (unwrap(rows) as IndicatorRow[]).map((row) => ({

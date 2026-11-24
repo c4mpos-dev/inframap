@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router'
+import { Navigate, useSearchParams } from 'react-router'
 import { AppIcon } from '@/components/brand/AppIcon'
+import { useAccount } from '@/data/useAccount'
 import { EmailSignInForm } from '@/features/sign-in/EmailSignInForm'
+import { NameForm } from '@/features/sign-in/NameForm'
 import { SignInOptions } from '@/features/sign-in/SignInOptions'
 
 export default function SignInPage() {
@@ -9,6 +11,9 @@ export default function SignInPage() {
   const [params] = useSearchParams()
   const requested = params.get('voltar') ?? '/mapa'
   const next = requested.startsWith('/') && !requested.startsWith('//') ? requested : '/mapa'
+  const { account, loading, refresh } = useAccount()
+
+  if (account?.name) return <Navigate to={next} replace />
 
   return (
     <div className="flex flex-1 items-stretch justify-center bg-asfalto md:items-center md:bg-concreto md:p-10">
@@ -37,10 +42,12 @@ export default function SignInPage() {
               Marque o que tá quebrado em Resende e acompanhe até alguém resolver.
             </p>
           </div>
-          {mode === 'options' ? (
+          {loading ? null : account ? (
+            <NameForm userId={account.id} onSaved={refresh} />
+          ) : mode === 'options' ? (
             <SignInOptions next={next} onChooseEmail={() => setMode('email')} />
           ) : (
-            <EmailSignInForm next={next} onBack={() => setMode('options')} />
+            <EmailSignInForm onBack={() => setMode('options')} />
           )}
         </div>
       </div>

@@ -94,8 +94,8 @@ export function MobileMarkFlow({ form }: { form: MarkProblemForm }) {
             onChange={(description) => patch({ description })}
           />
           <Switch
-            label="Enviar sem meu nome"
-            description="Ninguém vê quem marcou"
+            label="Ocultar meu nome neste relato"
+            description="Aparece como Morador(a) de Resende"
             checked={draft.anonymous}
             onChange={(anonymous) => patch({ anonymous })}
           />

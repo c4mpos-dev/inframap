@@ -15,8 +15,8 @@ const sections: LegalSection[] = [
           As confirmações de “eu também vi”, para contar quantas pessoas viram o mesmo problema.
         </li>
         <li>
-          Se você entrar com e-mail ou Google, o e-mail da conta. Marcando sem se identificar, nada
-          disso.
+          O e-mail da sua conta e o nome que você escolher. No relato público aparece só o primeiro
+          nome e a inicial do sobrenome, ou nada, se você ocultar o nome.
         </li>
       </ul>
     ),
@@ -25,8 +25,7 @@ const sections: LegalSection[] = [
     title: 'O que a gente não pede',
     body: (
       <p>
-        Nome, CPF, telefone ou endereço da sua casa. O relato é sobre o problema da rua, não sobre
-        você.
+        CPF, telefone ou endereço da sua casa. O relato é sobre o problema da rua, não sobre você.
       </p>
     ),
   },

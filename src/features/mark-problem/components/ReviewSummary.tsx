@@ -52,7 +52,7 @@ export function ReviewSummary({ draft }: { draft: MarkProblemDraft }) {
         icon={<StrokeIcon path={PERSON_PATH} />}
         iconClassName="bg-meio-fio"
         label="Quem marcou"
-        value={draft.anonymous ? 'Sem identificação' : 'Com seu nome'}
+        value={draft.anonymous ? 'Nome oculto' : 'Com seu primeiro nome'}
       />
     </div>
   )

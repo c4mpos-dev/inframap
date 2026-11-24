@@ -13,6 +13,7 @@ import { SelectedOccurrenceCard } from '@/features/map/components/SelectedOccurr
 import { MapView, type MapViewHandle } from '@/features/map/engine/MapView'
 import { filterOccurrences } from '@/features/map/filterOccurrences'
 import { useMapFilters } from '@/features/map/useMapFilters'
+import { useAccountGuard } from '@/features/auth/useAccountGuard'
 import { useUserLocation } from '@/features/map/useUserLocation'
 
 export default function MapPage() {
@@ -20,6 +21,7 @@ export default function MapPage() {
   const { occurrences, state, toggleConfirmation } = useOccurrences()
   const { filters, selectedId, select, ...filterActions } = useMapFilters()
   const { toast, showToast } = useToast()
+  const guard = useAccountGuard()
 
   const flyTo = useCallback((location: LatLng) => mapRef.current?.flyTo(location), [])
   const userLocation = useUserLocation(flyTo)
@@ -82,12 +84,12 @@ export default function MapPage() {
             <SelectedOccurrenceCard
               occurrence={selected}
               onClose={() => select(null)}
-              onToggleConfirmation={() => toggleConfirmation(selected.id)}
+              onToggleConfirmation={() => guard(() => toggleConfirmation(selected.id))}
               onLinkCopied={() => showToast('Link copiado.')}
             />
             <MobileSelectedSheet
               occurrence={selected}
-              onToggleConfirmation={() => toggleConfirmation(selected.id)}
+              onToggleConfirmation={() => guard(() => toggleConfirmation(selected.id))}
             />
           </>
         )}

@@ -15,6 +15,7 @@ export function makeOccurrence(overrides: Partial<Occurrence> = {}): Occurrence 
     confirmedByMe: false,
     photoUrl: null,
     anonymous: false,
+    authorName: 'Maria S.',
     events: [],
     forwardedTo: null,
     moderation: null,

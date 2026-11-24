@@ -59,7 +59,7 @@ export function HomeHero() {
             </Link>
           </div>
           <span className="hidden text-sm text-[#A8A296] md:block">
-            Gratuito. Dá para marcar sem se identificar.
+            Gratuito. Dá para ocultar seu nome em cada relato.
           </span>
         </div>
         <div className="hidden flex-[1_1_400px] justify-center md:flex">

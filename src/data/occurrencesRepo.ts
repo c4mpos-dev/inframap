@@ -7,7 +7,7 @@ import {
   type EventRow,
   type OccurrenceRow,
 } from './occurrenceRows'
-import { ensureSession } from './session'
+import { requireAccount } from './session'
 
 export interface NearbyOccurrence {
   occurrence: Occurrence
@@ -50,6 +50,14 @@ export const occurrencesRepo = {
   async list(): Promise<Occurrence[]> {
     const rows = unwrap(
       await publicOccurrences().is('moderation', null).order('created_at', { ascending: false }),
+    ) as OccurrenceRow[]
+    return rows.map((row) => toOccurrence(row))
+  },
+
+  async listMine(): Promise<Occurrence[]> {
+    await requireAccount()
+    const rows = unwrap(
+      await publicOccurrences().eq('is_mine', true).order('created_at', { ascending: false }),
     ) as OccurrenceRow[]
     return rows.map((row) => toOccurrence(row))
   },
@@ -99,7 +107,7 @@ export const occurrencesRepo = {
   },
 
   async report(occurrenceId: string, reason: ReportReason, details: string): Promise<void> {
-    await ensureSession()
+    await requireAccount()
     unwrap(
       await getSupabase()
         .from('content_reports')
@@ -108,7 +116,7 @@ export const occurrencesRepo = {
   },
 
   async create(input: NewOccurrence): Promise<Occurrence> {
-    const session = await ensureSession()
+    const session = await requireAccount()
     const photoPath = input.photoUrl ? await uploadPhoto(input.photoUrl, session.user.id) : null
     const created = unwrap(
       await getSupabase()
@@ -131,7 +139,7 @@ export const occurrencesRepo = {
   },
 
   async confirm(id: string): Promise<Occurrence> {
-    const session = await ensureSession()
+    const session = await requireAccount()
     const current = await occurrencesRepo.get(id)
     if (!current) throw new Error('Esse relato não existe mais.')
     const confirmations = getSupabase().from('confirmations')

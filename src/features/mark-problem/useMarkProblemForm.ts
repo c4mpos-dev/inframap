@@ -27,7 +27,7 @@ const emptyDraft: MarkProblemDraft = {
   categoryId: null,
   photoUrl: null,
   description: '',
-  anonymous: true,
+  anonymous: false,
 }
 
 export function useMarkProblemForm() {

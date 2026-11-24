@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { NearbyOccurrence } from '@/data/occurrencesRepo'
 import { occurrencesRepo } from '@/data/occurrencesRepo'
 import type { Occurrence } from '@/domain/types'
+import { useAccountGuard } from '@/features/auth/useAccountGuard'
 import { ConfirmPanel } from './components/ConfirmPanel'
 import { DetailHeader } from './components/DetailHeader'
 import { DetailHero } from './components/DetailHero'
@@ -26,6 +27,7 @@ export function OccurrenceDetail({
 }: OccurrenceDetailProps) {
   const [reporting, setReporting] = useState(false)
   const distance = useDistanceFromUser(occurrence.location)
+  const guard = useAccountGuard()
 
   return (
     <article className="flex flex-col">
@@ -42,7 +44,7 @@ export function OccurrenceDetail({
         <NearbyList nearby={nearby} />
         <button
           type="button"
-          onClick={() => setReporting(true)}
+          onClick={() => guard(() => setReporting(true))}
           className="self-center py-3 text-sm text-brita underline hover:text-asfalto"
         >
           Denunciar foto ou texto impróprio

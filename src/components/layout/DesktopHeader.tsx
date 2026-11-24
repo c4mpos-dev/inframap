@@ -1,6 +1,6 @@
 import { Link, NavLink } from 'react-router'
 import { Logo } from '@/components/brand/Logo'
-import { useAccount } from '@/data/useAccount'
+import { firstName, useAccount } from '@/data/useAccount'
 import { MarkProblemLink } from './MarkProblemLink'
 
 const links = [
@@ -48,10 +48,10 @@ export function DesktopHeader() {
                 aria-hidden="true"
                 className="flex size-8 items-center justify-center rounded-full bg-asfalto-2 font-extrabold text-faixa"
               >
-                {account.firstName.charAt(0).toUpperCase()}
+                {firstName(account).charAt(0).toUpperCase()}
               </span>
             )}
-            {account.firstName}
+            {firstName(account)}
           </Link>
         ) : (
           <Link

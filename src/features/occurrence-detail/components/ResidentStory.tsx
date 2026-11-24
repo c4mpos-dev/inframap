@@ -12,7 +12,7 @@ export function ResidentStory({ occurrence }: { occurrence: Occurrence }) {
         <p className="text-[15px] text-carvao">O morador não escreveu uma descrição.</p>
       )}
       <span className="text-[13px] text-brita">
-        {occurrence.anonymous ? 'Enviado sem identificação' : 'Enviado com identificação'}
+        Enviado por {occurrence.authorName ?? 'Morador(a) de Resende'}
       </span>
     </section>
   )

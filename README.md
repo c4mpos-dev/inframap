@@ -49,7 +49,7 @@ O banco, as regras de acesso e as funções ficam em `supabase/migrations/`. As 
 
 3. Em _Authentication → Sign In / Providers_, ligue **Allow anonymous sign-ins** (é o que permite marcar sem se identificar) e deixe o **Email** ligado.
 4. Em _Authentication → URL Configuration_, coloque a URL do site em _Site URL_ e adicione `http://localhost:5173/**` em _Redirect URLs_ (e a URL da Vercel quando houver deploy).
-5. **Google (opcional)**: em _Authentication → Sign In / Providers → Google_, cole o Client ID e o Secret criados no Google Cloud Console (_APIs & Services → Credentials → OAuth client ID_, tipo Web, com o _Callback URL_ que o Supabase mostra). Enquanto não estiver ligado, o botão avisa que o Google ainda não funciona.
+5. **Google**: no Google Cloud (projeto `inframap-515715`), crie um _OAuth client ID_ do tipo Web com a origem do site (`http://localhost:5173` e a URL da Vercel) e o redirect `https://<ref>.supabase.co/auth/v1/callback`. Em _Authentication → Sign In / Providers → Google_, cole o Client ID e o Client Secret. Enquanto o app estiver em modo de teste no Google, só entra quem estiver na lista de usuários de teste.
 
 ### E-mails de cadastro e login (Resend)
 
@@ -119,7 +119,7 @@ O `start` mostra a URL (`http://127.0.0.1:54321`) e a chave anon locais para col
 | `/equipe`          | Painel da equipe: fila, situação, repasse, nota, duplicados e inválidos      |
 | `/dev/componentes` | Vitrine dos componentes (só em desenvolvimento)                              |
 
-`/meus-relatos` e `/perfil` ainda são telas vazias.
+`/perfil` mostra nome, e-mail e foto de quem entrou (Google ou e-mail) e o botão de sair; no cabeçalho do computador, "Entrar" vira o nome da pessoa. `/meus-relatos` ainda é uma tela vazia.
 
 ## Como testar o que já existe
 

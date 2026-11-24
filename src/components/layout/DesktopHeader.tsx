@@ -1,5 +1,6 @@
 import { Link, NavLink } from 'react-router'
 import { Logo } from '@/components/brand/Logo'
+import { useAccount } from '@/data/useAccount'
 import { MarkProblemLink } from './MarkProblemLink'
 
 const links = [
@@ -14,6 +15,8 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   }`
 
 export function DesktopHeader() {
+  const { account } = useAccount()
+
   return (
     <header
       data-surface="dark"
@@ -28,12 +31,36 @@ export function DesktopHeader() {
         ))}
       </nav>
       <div className="ml-auto flex items-center gap-4">
-        <Link
-          to="/entrar"
-          className="py-3 text-[15px] font-semibold text-giz no-underline hover:text-concreto"
-        >
-          Entrar
-        </Link>
+        {account ? (
+          <Link
+            to="/perfil"
+            className="flex items-center gap-2 py-2 text-[15px] font-semibold text-giz no-underline hover:text-concreto"
+          >
+            {account.avatarUrl ? (
+              <img
+                src={account.avatarUrl}
+                alt=""
+                referrerPolicy="no-referrer"
+                className="size-8 rounded-full"
+              />
+            ) : (
+              <span
+                aria-hidden="true"
+                className="flex size-8 items-center justify-center rounded-full bg-asfalto-2 font-extrabold text-faixa"
+              >
+                {account.firstName.charAt(0).toUpperCase()}
+              </span>
+            )}
+            {account.firstName}
+          </Link>
+        ) : (
+          <Link
+            to="/entrar"
+            className="py-3 text-[15px] font-semibold text-giz no-underline hover:text-concreto"
+          >
+            Entrar
+          </Link>
+        )}
         <MarkProblemLink />
       </div>
     </header>

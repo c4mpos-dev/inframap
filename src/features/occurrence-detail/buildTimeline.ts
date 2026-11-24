@@ -6,7 +6,7 @@ export const NEIGHBORHOOD_CONFIRMATION_THRESHOLD = 5
 export type TimelineStepState = 'done' | 'current' | 'pending' | 'skipped'
 
 export interface TimelineStep {
-  key: 'registrada' | OccurrenceEventKind
+  key: 'registrada' | Exclude<OccurrenceEventKind, 'nota'>
   title: string
   detail: string | null
   at: string | null
@@ -28,7 +28,7 @@ function formatMissingConfirmations(missing: number): string {
 
 export function buildTimeline(occurrence: Occurrence): TimelineStep[] {
   const eventOf = (kind: OccurrenceEventKind) =>
-    occurrence.events.find((event) => event.kind === kind) ?? null
+    occurrence.events.findLast((event) => event.kind === kind) ?? null
   const reached = progressOrder[occurrence.status]
   const confirmedByNeighbors =
     occurrence.confirmations >= NEIGHBORHOOD_CONFIRMATION_THRESHOLD ||
@@ -44,7 +44,7 @@ export function buildTimeline(occurrence: Occurrence): TimelineStep[] {
     {
       key: 'registrada',
       title: 'Registrada',
-      detail: null,
+      detail: reached === 1 ? (eventOf('nota')?.note ?? null) : null,
       at: occurrence.createdAt,
       state: 'done',
       color: getStatus('aberta').color,
@@ -66,7 +66,11 @@ export function buildTimeline(occurrence: Occurrence): TimelineStep[] {
     {
       key: 'andamento',
       title: 'Em andamento',
-      detail: inProgress?.note ?? null,
+      detail:
+        inProgress?.note ??
+        (occurrence.forwardedTo && reached >= 2
+          ? `Repassada para ${occurrence.forwardedTo}`
+          : null),
       at: inProgress?.at ?? null,
       state: stateFor(2),
       color: getStatus('andamento').color,

@@ -30,3 +30,13 @@ export function formatDistance(meters: number): string {
   if (meters < 1000) return `${Math.max(1, Math.round(meters / 10) * 10)} m`
   return `${(meters / 1000).toFixed(1).replace('.', ',')} km`
 }
+
+export function formatElapsed(isoDate: string, now: Date = new Date()): string {
+  const minutes = Math.max(1, Math.floor((now.getTime() - new Date(isoDate).getTime()) / 60000))
+  if (minutes < 60) return `${minutes} min`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours} h`
+  const days = Math.floor(hours / 24)
+  if (days < 7) return days === 1 ? '1 dia' : `${days} dias`
+  return `${Math.floor(days / 7)} sem`
+}

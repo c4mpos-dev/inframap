@@ -8,6 +8,7 @@ const NEARBY_LIMIT = 3
 type DetailState =
   | { status: 'loading' }
   | { status: 'missing' }
+  | { status: 'merged'; originalId: string }
   | { status: 'ready'; occurrence: Occurrence; nearby: NearbyOccurrence[] }
 
 export function useOccurrenceDetail(id: string) {
@@ -18,8 +19,12 @@ export function useOccurrenceDetail(id: string) {
     async function load() {
       const occurrence = await occurrencesRepo.get(id)
       if (!active) return
-      if (!occurrence) {
+      if (!occurrence || occurrence.moderation === 'invalida') {
         setState({ status: 'missing' })
+        return
+      }
+      if (occurrence.moderation === 'duplicada' && occurrence.duplicateOf) {
+        setState({ status: 'merged', originalId: occurrence.duplicateOf })
         return
       }
       const nearby = await occurrencesRepo.listNearby(

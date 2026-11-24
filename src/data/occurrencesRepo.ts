@@ -1,10 +1,9 @@
 import { distanceInMeters } from '@/domain/geo'
 import type { CategoryId, LatLng, NewOccurrence, Occurrence, ReportReason } from '@/domain/types'
 import { readStorage, writeStorage } from '@/lib/storage'
-import { buildMockOccurrences, firstProtocolNumber, formatProtocol } from './mock/occurrences'
+import { firstProtocolNumber, formatProtocol } from './mock/occurrences'
+import { occurrenceStore } from './occurrenceStore'
 
-const CREATED_KEY = 'inframap:created-occurrences'
-const CONFIRMED_KEY = 'inframap:confirmed-occurrences'
 const REPORTS_KEY = 'inframap:content-reports'
 
 export interface ContentReport {
@@ -19,35 +18,37 @@ export interface NearbyOccurrence {
   distanceMeters: number
 }
 
-let createdOccurrences = readStorage<Occurrence[]>(CREATED_KEY, [])
-let confirmedIds = new Set(readStorage<string[]>(CONFIRMED_KEY, []))
-
-function allOccurrences(): Occurrence[] {
-  return [...buildMockOccurrences(), ...createdOccurrences].map((occurrence) => {
-    const confirmedByMe = confirmedIds.has(occurrence.id)
-    return {
-      ...occurrence,
-      confirmedByMe,
-      confirmations: occurrence.confirmations + (confirmedByMe ? 1 : 0),
-      location: { ...occurrence.location },
-      events: occurrence.events ?? [],
-    }
-  })
+export function findNearbyAmong(
+  occurrences: Occurrence[],
+  location: LatLng,
+  categoryId: CategoryId,
+  radiusMeters: number,
+  excludeId?: string,
+): NearbyOccurrence[] {
+  return occurrences
+    .filter(
+      (item) =>
+        item.id !== excludeId && item.categoryId === categoryId && item.status !== 'resolvida',
+    )
+    .map((occurrence) => ({
+      occurrence,
+      distanceMeters: distanceInMeters(location, occurrence.location),
+    }))
+    .filter((candidate) => candidate.distanceMeters <= radiusMeters)
+    .sort((a, b) => a.distanceMeters - b.distanceMeters)
 }
 
-function findOrThrow(id: string): Occurrence {
-  const occurrence = allOccurrences().find((item) => item.id === id)
-  if (!occurrence) throw new Error(`Ocorrência não encontrada: ${id}`)
-  return occurrence
+export function readContentReports(): ContentReport[] {
+  return readStorage<ContentReport[]>(REPORTS_KEY, [])
 }
 
 export const occurrencesRepo = {
   async list(): Promise<Occurrence[]> {
-    return allOccurrences().sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    return occurrenceStore.visible().sort((a, b) => b.createdAt.localeCompare(a.createdAt))
   },
 
   async get(id: string): Promise<Occurrence | null> {
-    return allOccurrences().find((item) => item.id === id) ?? null
+    return occurrenceStore.find(id)
   },
 
   async listNearby(
@@ -56,17 +57,7 @@ export const occurrencesRepo = {
     radiusMeters: number,
     excludeId?: string,
   ): Promise<NearbyOccurrence[]> {
-    return allOccurrences()
-      .filter(
-        (item) =>
-          item.id !== excludeId && item.categoryId === categoryId && item.status !== 'resolvida',
-      )
-      .map((occurrence) => ({
-        occurrence,
-        distanceMeters: distanceInMeters(location, occurrence.location),
-      }))
-      .filter((candidate) => candidate.distanceMeters <= radiusMeters)
-      .sort((a, b) => a.distanceMeters - b.distanceMeters)
+    return findNearbyAmong(occurrenceStore.visible(), location, categoryId, radiusMeters, excludeId)
   },
 
   async findNearby(
@@ -79,13 +70,12 @@ export const occurrencesRepo = {
   },
 
   async report(occurrenceId: string, reason: ReportReason, details: string): Promise<void> {
-    const reports = readStorage<ContentReport[]>(REPORTS_KEY, [])
     const report = { occurrenceId, reason, details, createdAt: new Date().toISOString() }
-    writeStorage(REPORTS_KEY, [...reports, report])
+    writeStorage(REPORTS_KEY, [...readContentReports(), report])
   },
 
   async create(input: NewOccurrence): Promise<Occurrence> {
-    const sequence = firstProtocolNumber + allOccurrences().length
+    const sequence = firstProtocolNumber + occurrenceStore.all().length
     const occurrence: Occurrence = {
       ...input,
       id: String(sequence),
@@ -95,18 +85,18 @@ export const occurrencesRepo = {
       confirmations: 0,
       confirmedByMe: false,
       events: [],
+      forwardedTo: null,
+      moderation: null,
+      duplicateOf: null,
     }
-    createdOccurrences = [...createdOccurrences, occurrence]
-    writeStorage(CREATED_KEY, createdOccurrences)
+    occurrenceStore.addCreated(occurrence)
     return occurrence
   },
 
   async confirm(id: string): Promise<Occurrence> {
-    const next = new Set(confirmedIds)
-    if (next.has(id)) next.delete(id)
-    else next.add(id)
-    confirmedIds = next
-    writeStorage(CONFIRMED_KEY, [...confirmedIds])
-    return findOrThrow(id)
+    occurrenceStore.toggleConfirmed(id)
+    const occurrence = occurrenceStore.find(id)
+    if (!occurrence) throw new Error(`Ocorrência não encontrada: ${id}`)
+    return occurrence
   },
 }

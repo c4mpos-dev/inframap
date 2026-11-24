@@ -8,7 +8,9 @@ export interface LatLng {
   lng: number
 }
 
-export type OccurrenceEventKind = 'confirmada' | 'andamento' | 'resolvida'
+export type OccurrenceEventKind = 'nota' | 'confirmada' | 'andamento' | 'resolvida'
+
+export type Moderation = 'duplicada' | 'invalida'
 
 export interface OccurrenceEvent {
   kind: OccurrenceEventKind
@@ -33,6 +35,9 @@ export interface Occurrence {
   photoUrl: string | null
   anonymous: boolean
   events: OccurrenceEvent[]
+  forwardedTo: string | null
+  moderation: Moderation | null
+  duplicateOf: string | null
 }
 
 export interface NewOccurrence {

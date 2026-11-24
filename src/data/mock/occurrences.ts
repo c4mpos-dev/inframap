@@ -169,6 +169,9 @@ export function buildMockOccurrences(now: Date = new Date()): Occurrence[] {
         at: new Date(createdAt.getTime() + event.hoursAfter * HOUR_MS).toISOString(),
         note: event.note ?? null,
       })),
+      forwardedTo: null,
+      moderation: null,
+      duplicateOf: null,
     }
   })
 }

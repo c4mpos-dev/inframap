@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router'
+import { Navigate, useNavigate, useParams } from 'react-router'
 import { Toast } from '@/components/ui/Toast'
 import { useToast } from '@/components/ui/useToast'
 import { useOccurrences } from '@/data/useOccurrences'
@@ -28,6 +28,8 @@ export default function OccurrencePage() {
   const isDesktop = useIsDesktop()
   const { state, toggleConfirmation } = useOccurrenceDetail(id)
   const { toast, showToast } = useToast()
+
+  if (state.status === 'merged') return <Navigate to={`/ocorrencia/${state.originalId}`} replace />
 
   const detail =
     state.status === 'loading' ? (

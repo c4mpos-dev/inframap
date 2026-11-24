@@ -27,12 +27,6 @@ export default function MapPage() {
   const visible = useMemo(() => filterOccurrences(occurrences, filters), [occurrences, filters])
   const selected = visible.find((occurrence) => occurrence.id === selectedId) ?? null
 
-  function selectFromList(id: string) {
-    select(id)
-    const occurrence = visible.find((item) => item.id === id)
-    if (occurrence) flyTo(occurrence.location)
-  }
-
   return (
     <div className="fixed inset-0 flex md:relative md:inset-auto md:h-[calc(100dvh-4.25rem)]">
       <DesktopMapPanel
@@ -41,7 +35,7 @@ export default function MapPage() {
         occurrences={visible}
         loading={state === 'loading'}
         selectedId={selectedId}
-        onSelect={selectFromList}
+        onSelect={select}
       />
 
       <section aria-label="Mapa de ocorrências" className="relative min-w-0 flex-1 bg-mapa-fundo">

@@ -1,5 +1,5 @@
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { useCallback, useEffect, useImperativeHandle, useRef, type Ref } from 'react'
+import { useCallback, useEffect, useImperativeHandle, useRef, useState, type Ref } from 'react'
 import MapGL, { AttributionControl, Marker, type MapRef } from 'react-map-gl/mapbox'
 import { prefersReducedMotion } from '@/lib/motion'
 import { RESENDE_CENTER } from '@/domain/resende'
@@ -13,6 +13,8 @@ import { addViaDutraLayer } from './viaDutraLayer'
 const INITIAL_ZOOM = 13.2
 const FOCUS_ZOOM = 15
 const MAP_STYLE = 'mapbox://styles/mapbox/light-v11'
+const DESKTOP_FOCUS_PADDING = { top: 80, bottom: 80, left: 80, right: 80 }
+const MOBILE_FOCUS_PADDING = { top: 140, bottom: 300, left: 40, right: 40 }
 
 export interface MapViewHandle {
   zoomIn: () => void
@@ -42,26 +44,43 @@ export function MapView({
   const token = import.meta.env.VITE_MAPBOX_TOKEN
   const mapRef = useRef<MapRef>(null)
   const stopDashRef = useRef<() => void>(() => {})
+  const [loaded, setLoaded] = useState(false)
+
+  const flyTo = useCallback(({ lat, lng }: LatLng) => {
+    const map = mapRef.current
+    if (!map) return
+    map.flyTo({
+      center: [lng, lat],
+      zoom: Math.max(map.getZoom(), FOCUS_ZOOM),
+      padding: window.matchMedia('(min-width: 768px)').matches
+        ? DESKTOP_FOCUS_PADDING
+        : MOBILE_FOCUS_PADDING,
+      duration: prefersReducedMotion() ? 0 : 900,
+    })
+  }, [])
 
   useImperativeHandle(ref, () => ({
     zoomIn: () => mapRef.current?.zoomIn(),
     zoomOut: () => mapRef.current?.zoomOut(),
-    flyTo: ({ lat, lng }) => {
-      const map = mapRef.current
-      if (!map) return
-      map.flyTo({
-        center: [lng, lat],
-        zoom: Math.max(map.getZoom(), FOCUS_ZOOM),
-        duration: prefersReducedMotion() ? 0 : 900,
-      })
-    },
+    flyTo,
   }))
+
+  const selectedLocation = occurrences.find((item) => item.id === selectedId)?.location
+  const selectedLat = selectedLocation?.lat
+  const selectedLng = selectedLocation?.lng
+
+  useEffect(() => {
+    if (loaded && selectedLat !== undefined && selectedLng !== undefined) {
+      flyTo({ lat: selectedLat, lng: selectedLng })
+    }
+  }, [loaded, selectedLat, selectedLng, flyTo])
 
   const handleLoad = useCallback(() => {
     const map = mapRef.current?.getMap()
     if (!map) return
     applyDesignTheme(map)
     stopDashRef.current = addViaDutraLayer(map, !prefersReducedMotion())
+    setLoaded(true)
   }, [])
 
   useEffect(() => () => stopDashRef.current(), [])

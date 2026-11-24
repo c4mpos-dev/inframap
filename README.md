@@ -1,218 +1,177 @@
-# InfraMap
+<p align="center">
+  <a href="https://inframap-g3.vercel.app">
+    <img src="docs/img/capa.png" alt="InfraMap: Viu? Marca. Um pino amarelo no meio de uma rua." width="100%" />
+  </a>
+</p>
 
-Mapa colaborativo de problemas de infraestrutura urbana em Resende (RJ). Projeto de extensão do Grupo 3 da AEDB (ODS 9.1).
+<p align="center">
+  <a href="https://inframap-g3.vercel.app"><img src="https://img.shields.io/badge/abrir_o_mapa-inframap--g3.vercel.app-FFC21A?style=for-the-badge&labelColor=1C1F1E" alt="Abrir o InfraMap" /></a>
+</p>
 
-**No ar:** https://inframap-g3.vercel.app
+<p align="center">
+  <img src="https://img.shields.io/badge/Resende-RJ-1C1F1E?style=flat-square" alt="Resende, RJ" />
+  <img src="https://img.shields.io/badge/projeto_de_extensão-AEDB-1C1F1E?style=flat-square" alt="Projeto de extensão da AEDB" />
+  <img src="https://img.shields.io/badge/ODS-9.1-1D5FD1?style=flat-square" alt="ODS 9.1" />
+  <img src="https://img.shields.io/badge/gratuito-sempre-157A4F?style=flat-square" alt="Gratuito" />
+</p>
 
-Moradores marcam no mapa buracos, bueiros, calçadas, sinalização e iluminação; a vizinhança confirma ("eu também vi") e a equipe atualiza a situação. O InfraMap organiza e repassa os relatos, mas não é canal oficial da prefeitura nem garante prazo de conserto.
+<br />
 
-## Rodar localmente
+Todo mundo em Resende conhece aquele buraco que está lá há meses. Alguém reclama no grupo do bairro, três pessoas respondem "aqui também", a mensagem some no meio de bom dia e figurinha, e no mês seguinte o buraco continua no mesmo lugar.
 
-Precisa de Node 20 ou mais novo.
+O **InfraMap** é o lugar para essa reclamação não se perder. Você marca o problema no mapa da cidade, os vizinhos confirmam que também viram e qualquer pessoa acompanha o que aconteceu depois. Buraco, bueiro entupido, calçada quebrada, placa caída, poste apagado.
 
-```bash
-npm install
-npm run dev
+É um projeto de extensão de alunos da AEDB, feito para Resende.
+
+<p align="center">
+  <img src="docs/img/mapa.png" alt="Mapa de Resende com os relatos marcados em pinos coloridos e a lista de relatos ao lado." width="100%" />
+</p>
+<p align="center"><sub>As imagens desta página usam relatos de exemplo.</sub></p>
+
+## Como funciona
+
+**1. Viu? Marca.** Abra o site no celular, toque no **+** amarelo e arraste o mapa até o ponto do problema. Se o GPS estiver ligado, ele já começa onde você está. Escolha a categoria, tire uma foto se der e conte em uma frase o que está acontecendo. Leva menos de um minuto.
+
+**2. A vizinhança confirma.** Quem passa pelo mesmo lugar toca em **"Eu também vi"**. Com 5 confirmações, o relato ganha o selo de confirmado pela vizinhança. Um buraco que 30 pessoas confirmaram pesa mais do que uma reclamação solta.
+
+**3. Todo mundo acompanha.** A equipe do projeto confere os relatos, junta os repetidos e leva os casos para quem resolve. Cada mudança aparece na linha do tempo do relato, com data e uma nota explicando o que foi feito.
+
+```mermaid
+flowchart LR
+    A["Aberta"] --> B["Em andamento"]
+    B --> C["Resolvida"]
+    style A fill:#C2410C,color:#fff,stroke:#1C1F1E
+    style B fill:#1D5FD1,color:#fff,stroke:#1C1F1E
+    style C fill:#157A4F,color:#fff,stroke:#1C1F1E
 ```
 
-Abra http://localhost:5173.
+<p align="center">
+  <img src="docs/img/celular.png" alt="Três telas do InfraMap no celular: o mapa com um relato aberto, o detalhe de um relato e o primeiro passo para marcar um problema." width="100%" />
+</p>
 
-### Variáveis de ambiente
+## O que dá para marcar
 
-Crie um arquivo `.env.local` na raiz (ele não vai para o git), copiando o `.env.example`:
+| Categoria          | Exemplos                                                     |
+| ------------------ | ------------------------------------------------------------ |
+| **Vias e buracos** | buraco, asfalto afundado, meio-fio quebrado                  |
+| **Calçadas**       | calçada quebrada, raiz levantando placa, falta de rampa      |
+| **Saneamento**     | bueiro entupido, esgoto a céu aberto, ponto de alagamento    |
+| **Sinalização**    | placa caída, faixa de pedestre apagada, semáforo com defeito |
+| **Iluminação**     | poste apagado ou piscando                                    |
+| **Outros**         | o que não se encaixar nas de cima                            |
 
-```
-VITE_MAPBOX_TOKEN=pk.seu_token
-VITE_SUPABASE_URL=https://seu-projeto.supabase.co
-VITE_SUPABASE_ANON_KEY=sua_chave_anon
-```
+Ficou na dúvida? Marque em **Outros**. A equipe reorganiza depois.
 
-- **Mapbox**: o token público da conta, o que começa com `pk.`. Sem ele, a área do mapa mostra um aviso.
-- **Supabase**: em _Project Settings → API_, a _Project URL_ e a chave _anon public_. Essa chave pode ir para o navegador; quem protege os dados são as regras do banco (RLS). A chave `service_role` **nunca** entra aqui.
+## Os números da cidade
 
-Depois de mudar o `.env.local`, reinicie o `npm run dev`.
+Na aba **Números**, qualquer pessoa vê quantos relatos existem, quantos já foram resolvidos, quais bairros concentram mais problemas e como isso muda semana a semana. Dá para filtrar por bairro, categoria e período, e baixar tudo em planilha (CSV) para levar a uma reunião da associação ou à Câmara.
 
-## Supabase
+O projeto tem duas metas para este semestre: **80 relatos no mapa** e **50 moradores cadastrados**. O placar fica na mesma página.
 
-O banco, as regras de acesso e as funções ficam em `supabase/migrations/`. As regras de segurança são testadas em `supabase/tests/database/rls.test.sql` (19 verificações).
+<p align="center">
+  <img src="docs/img/inicio.png" alt="Página inicial do InfraMap com o título Viu? Marca. e um mapa ilustrado." width="100%" />
+</p>
 
-### Criar o projeto e aplicar o banco
+## Perguntas que a gente sempre ouve
 
-1. Em https://supabase.com/dashboard, crie um projeto (região South America · São Paulo, plano Free).
-2. Ligue a pasta ao projeto e envie as migrations (o `login` abre o navegador; o `ref` é o código na URL do projeto):
+<details>
+<summary><b>Isso é da prefeitura?</b></summary>
+<br />
 
-   ```bash
-   npx supabase login
-   npx supabase link --project-ref SEU_REF
-   npx supabase db push --remote
-   ```
+Não. O InfraMap é um projeto de extensão de estudantes da AEDB. A gente organiza os relatos e leva os dados para a prefeitura e para as concessionárias, mas não é um canal oficial e não consegue garantir prazo de conserto. Para emergência, como fio caído ou vazamento grande, ligue direto para a concessionária ou para a Defesa Civil.
 
-   Sem `--remote`, o `db push` grava no banco local do Docker, não na nuvem. O seed (relatos de exemplo) não vai para a nuvem.
+</details>
 
-3. Em _Authentication → Sign In / Providers_, deixe **Allow anonymous sign-ins desligado**, **Confirm email** ligado e, em _Email_, o **Email OTP length** em `6`.
-4. Em _Authentication → URL Configuration_, coloque a URL do site em _Site URL_ e adicione `http://localhost:5173/**` em _Redirect URLs_ (e a URL da Vercel quando houver deploy).
-5. **Google**: no Google Cloud (projeto `inframap-515715`), crie um _OAuth client ID_ do tipo Web com a origem do site (`http://localhost:5173` e a URL da Vercel) e o redirect `https://<ref>.supabase.co/auth/v1/callback`. Em _Authentication → Sign In / Providers → Google_, cole o Client ID e o Client Secret. Enquanto o app estiver em modo de teste no Google, só entra quem estiver na lista de usuários de teste.
+<details>
+<summary><b>Preciso criar conta?</b></summary>
+<br />
 
-### E-mails de cadastro e login (Resend)
+Para olhar o mapa e os números, não. Para marcar, confirmar ou denunciar um relato, sim. Dá para entrar com a conta do Google, em dois toques, ou com o seu e-mail: chega um código de 6 números e você digita na tela. Não tem senha para decorar.
 
-O e-mail padrão do Supabase só manda para quem é membro do projeto, no máximo 2 por hora. Por isso os e-mails saem pelo Resend, com o domínio verificado `send.cauacampos.dev`.
+A conta existe para um motivo simples: sem ela, uma pessoa só conseguiria encher o mapa de relatos falsos ou confirmar o próprio relato vinte vezes.
 
-1. No Resend, crie uma API key com _Sending access_ só para esse domínio.
-2. Em _Authentication → Emails → SMTP Settings_, ligue o SMTP próprio: remetente `inframap@send.cauacampos.dev`, nome `InfraMap`, host `smtp.resend.com`, porta `465`, usuário `resend` e a API key como senha.
-3. Em _Authentication → Emails → Templates_, cole `supabase/templates/confirmation.html` em _Confirm sign up_ (assunto "Confirme seu cadastro no InfraMap") e `supabase/templates/magic_link.html` em _Magic link or OTP_ (assunto "Seu código para entrar no InfraMap").
-4. Deixe _Confirm email_ ligado em _Sign In / Providers_.
+</details>
 
-Os dois e-mails mandam um **código de 6 números** (não um link): no celular, o link costuma abrir no navegador do app de e-mail e a pessoa fica logada no lugar errado; o código ela digita na mesma tela. Na primeira vez chega "Confirme seu cadastro"; nas seguintes, "Seu código para entrar". No Supabase local os dois templates já vêm ligados pelo `config.toml` e aparecem no Mailpit (http://127.0.0.1:54324).
+<details>
+<summary><b>Meu nome aparece?</b></summary>
+<br />
 
-### Liberar alguém na equipe
+Aparece só o primeiro nome e a inicial do sobrenome, tipo "Maria S.". Se preferir, ligue **"Ocultar meu nome neste relato"** na hora de marcar e o relato sai como "Morador(a) de Resende". O seu e-mail nunca aparece para ninguém, nem para a equipe na hora de cuidar dos relatos.
 
-A pessoa entra uma vez em `/entrar` com o e-mail dela. Depois, no _SQL Editor_ do Supabase:
+</details>
 
-```sql
-insert into public.staff (user_id)
-select id from auth.users where email = 'pessoa@exemplo.com';
-```
+<details>
+<summary><b>E a foto? Ela mostra onde eu moro?</b></summary>
+<br />
 
-Para tirar da equipe, `delete from public.staff where user_id = (select id from auth.users where email = 'pessoa@exemplo.com');`.
+A foto é diminuída e convertida no seu próprio celular antes de sair dele, e nesse processo a localização escondida no arquivo é apagada. O que fica público é só o ponto que você marcou no mapa. Evite fotografar rosto e placa de carro. Se alguém fizer isso, qualquer pessoa pode tocar em "Denunciar" e a equipe tira do ar.
 
-### Rodar o Supabase no próprio computador (opcional)
+</details>
 
-Com o Docker Desktop aberto:
+<details>
+<summary><b>Vi um problema que já está no mapa. Marco de novo?</b></summary>
+<br />
 
-```bash
-npx supabase start      # sobe banco, login e storage locais com os relatos de exemplo de supabase/seed.sql
-npx supabase test db    # roda os testes das regras de segurança
-```
+Não precisa. Se você tentar marcar algo da mesma categoria a menos de 50 metros de um relato aberto, o InfraMap avisa e sugere confirmar o que já existe. Confirmar ajuda mais do que repetir.
 
-O `start` mostra a URL (`http://127.0.0.1:54321`) e a chave anon locais para colocar no `.env.local`.
+</details>
 
-### O que o banco garante
+<details>
+<summary><b>Funciona no meu celular?</b></summary>
+<br />
 
-- Qualquer pessoa vê os relatos e os indicadores; ninguém vê quem marcou. Relatos inválidos somem para o público; duplicados continuam acessíveis pelo link e levam ao original.
-- Ver o mapa, os relatos e os indicadores não exige conta. Para marcar, confirmar, denunciar ou enviar foto é preciso uma **conta confirmada** (código no e-mail ou Google): sessões anônimas são recusadas pelo próprio banco, mesmo que alguém religue o login anônimo.
-- Cada conta tem um perfil com o nome. No relato público aparece só o primeiro nome e a inicial ("Maria S."), ou "Morador(a) de Resende" quando a pessoa oculta o nome naquele relato.
-- O morador não escolhe a situação nem edita o relato depois de enviar. Cada pessoa confirma uma vez.
-- No máximo 10 relatos por pessoa a cada 24 horas.
-- Só a equipe (tabela `staff`) muda situação, repassa, junta duplicados, marca inválido e lê denúncias, sempre por funções do banco.
-- Fotos vão para o bucket público `occurrence-photos`, até 5 MB, só imagem, cada pessoa na própria pasta.
+É um site, não precisa instalar nada. Foi testado em tela pequena (360 pixels de largura, a de muito celular de entrada) e a página inicial carrega com uns 120 KB. Se quiser, dá para adicionar à tela inicial pelo menu do navegador e ele abre como um aplicativo.
 
-## Publicar na Vercel
+</details>
 
-O `vercel.json` já cuida das rotas (recarregar `/mapa` não dá 404), do cache dos arquivos e de cabeçalhos de segurança.
+<details>
+<summary><b>Tem limite de relatos?</b></summary>
+<br />
 
-1. Em https://vercel.com, _Add New → Project_, importe o repositório do GitHub. A Vercel reconhece o Vite sozinha.
-2. Em _Environment Variables_, cadastre as três do `.env.local` (`VITE_MAPBOX_TOKEN`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`; a `service_role` nunca vai para o front) e `VITE_SITE_URL` com a URL pública do site. Não use a integração "Supabase" da Vercel: ela cria variáveis com nomes do Next.js.
-3. _Deploy_. A URL fica no formato `https://<projeto>.vercel.app`.
-4. Depois do primeiro deploy, aponte os serviços para a URL nova:
-   - **Supabase** → _Authentication → URL Configuration_: _Site URL_ = a URL da Vercel e, em _Redirect URLs_, `https://<projeto>.vercel.app/**`.
-   - **Google Cloud** (projeto `inframap-515715`) → _Clientes → InfraMap Supabase_: adicione a URL da Vercel em _Origens JavaScript autorizadas_. Em _Branding_, preencha página inicial, `/privacidade`, `/termos` e o domínio autorizado (`vercel.app` não serve: use o domínio completo do projeto). Em _Público-alvo_, _Publicar app_.
-   - **Mapbox**: se o token tiver restrição de URL, adicione a URL da Vercel.
+Cada pessoa pode marcar até 10 problemas a cada 24 horas. É uma trava contra abuso, não deve atrapalhar ninguém que esteja marcando o próprio bairro.
 
-### Prévia no WhatsApp e SEO
+</details>
 
-O `index.html` traz título, descrição, Open Graph e Twitter card com a imagem `public/og.png` (1200×630). As URLs absolutas que o WhatsApp exige são montadas no build a partir de `VITE_SITE_URL` (na Vercel: `https://inframap-g3.vercel.app`). Sem ela, o build usa `VERCEL_PROJECT_PRODUCTION_URL`, que pode ser outro domínio do projeto: foi o que deixou a primeira prévia sem imagem. Ao trocar de domínio, atualize essa variável e faça um novo deploy. O build também gera `robots.txt` e `sitemap.xml`.
+<details>
+<summary><b>O que acontece com os meus dados?</b></summary>
+<br />
 
-A imagem e os ícones PNG saem de `scripts/brand/og.html` e `scripts/brand/icon.html`, renderizados no Chrome sem interface (`--headless=new --screenshot`). O WhatsApp guarda a prévia em cache: se trocar a imagem, mude o nome do arquivo.
+Guardamos o e-mail da sua conta, o nome que você escolheu e o que você marcou no mapa. Não pedimos CPF, telefone nem endereço. Os detalhes estão na <a href="https://inframap-g3.vercel.app/privacidade">política de privacidade</a> e nos <a href="https://inframap-g3.vercel.app/termos">termos de uso</a>.
 
-## Scripts
+</details>
 
-| Comando             | O que faz                     |
-| ------------------- | ----------------------------- |
-| `npm run dev`       | Servidor de desenvolvimento   |
-| `npm run build`     | Typecheck + build de produção |
-| `npm run lint`      | ESLint                        |
-| `npm run typecheck` | TypeScript sem gerar arquivos |
-| `npm run format`    | Formata tudo com Prettier     |
-| `npm test`          | Testes da lógica (Vitest)     |
+## Acessível de verdade
 
-## Telas
+O site funciona só com teclado, do primeiro "Pular para o conteúdo" até o envio do relato, e todas as páginas passam no verificador automático axe, no celular e no computador. Cada pino do mapa é lido em voz alta com o título, a categoria e a situação. As animações desligam sozinhas para quem pediu menos movimento nas configurações do celular.
 
-| Rota               | O que tem                                                                    |
-| ------------------ | ---------------------------------------------------------------------------- |
-| `/`                | Início: “Viu? Marca.”, como funciona, o que é e não é, encontros, quem faz   |
-| `/entrar`          | Entrar com Google ou com código no e-mail; no primeiro acesso, pede o nome   |
-| `/privacidade`     | Privacidade e LGPD (rascunho para revisão do grupo)                          |
-| `/termos`          | Termos de uso (rascunho para revisão do grupo)                               |
-| `/mapa`            | Mapa com os relatos, busca, filtros de categoria e situação, lista e detalhe |
-| `/marcar`          | Marcar um problema (4 passos no celular, uma tela no computador)             |
-| `/ocorrencia/:id`  | Detalhe: foto, confirmação, andamento, parecidos perto e denúncia            |
-| `/indicadores`     | Números da cidade por período, bairro e categoria, com download em CSV       |
-| `/equipe`          | Painel da equipe: fila, situação, repasse, nota, duplicados e inválidos      |
-| `/dev/componentes` | Vitrine dos componentes (só em desenvolvimento)                              |
+## Quem faz
 
-`/perfil` mostra nome, e-mail e foto, deixa trocar o nome e sair; no cabeçalho do computador, "Entrar" vira o nome da pessoa. `/meus-relatos` lista os relatos da própria conta. `/marcar` e `/meus-relatos` levam para `/entrar` quem não entrou, e "Eu também vi" e "Denunciar" fazem o mesmo; depois de entrar, a pessoa volta para onde estava.
+Grupo 3 de extensão da AEDB (Associação Educacional Dom Bosco), em Resende, com orientação do professor **Douglas Rosa Grillo**.
 
-## Como testar o que já existe
+<table>
+  <tr>
+    <td>Cauã Campos de Souza e Silva</td>
+    <td>Guilherme Henrique Valim Soares</td>
+    <td>Gustavo Pontes Mazoni</td>
+  </tr>
+  <tr>
+    <td>Igor Pontes Mazoni</td>
+    <td>Isabella Leite Benjamim</td>
+    <td>João Gabriel Santos Juvenal</td>
+  </tr>
+  <tr>
+    <td>Samuel Barbosa da Silva</td>
+    <td>Weslley Candido Madeira da Rocha</td>
+    <td>Wendell Candido Madeira da Rocha</td>
+  </tr>
+</table>
 
-1. **Mapa**: abra `/mapa`, filtre por categoria ou situação, busque um bairro e clique num pino ou num card da lista. Os filtros ficam na URL, então dá para compartilhar o link.
-2. **Marcar**: abra `/marcar`, escolha o ponto, a categoria e envie. O relato novo aparece no mapa. Marcando de novo no mesmo ponto e categoria, aparece o aviso de parecido.
-3. **Detalhe**: em qualquer relato, use "Eu também vi", compartilhe ou denuncie.
-4. **Indicadores**: abra `/indicadores` e troque período, bairro e categoria.
-5. **Início e Entrar**: abra `/`, use o menu ☰ no celular e os atalhos "Como funciona" e "Encontros". Em `/entrar`, peça o código por e-mail, digite e escolha o nome.
-6. **Equipe**: libere seu e-mail na equipe (veja acima), abra `/equipe`, escolha um relato, mude a situação, escreva uma nota e salve. A nota aparece no andamento do detalhe. "Juntar os dois" transforma o mais novo em duplicado do mais antigo, e "Marcar inválido" tira o relato do mapa e dos números.
+O projeto se apoia no Objetivo de Desenvolvimento Sustentável 9.1 da ONU: infraestrutura de qualidade, confiável e acessível para todo mundo.
 
-## Testes e verificações
+---
 
-- **Lógica** (`npm test`): andamento do relato, indicadores, filtros do mapa, validação do formulário de marcar, título automático, CSV, protocolo, distâncias e datas. Os testes ficam ao lado de cada arquivo (`*.test.ts`).
-- **Banco** (`npx supabase test db`, com o Supabase local rodando): regras de segurança em pgTAP.
-- **Fluxos à mão, contra o Supabase na nuvem**: marcar com foto, confirmar, denunciar e indicadores. Login por e-mail e painel da equipe foram testados no Supabase local.
-- **Acessibilidade**: todas as telas passam no axe (WCAG 2.1 AA) no celular e no computador. Dá para usar só com teclado: "Pular para o conteúdo" no primeiro Tab, pinos do mapa abrem com Enter e fecham com Esc, o foco vai para o título de cada passo ao marcar e volta ao botão quando um painel fecha. Cada tela tem título próprio na aba, e ao trocar de tela o foco vai para o conteúdo, para o leitor de tela começar do topo.
-- **Celular de entrada** (tela de 360 px, build de produção): nenhuma tela passa da largura. O início baixa cerca de 120 KB; o Mapbox (cerca de 530 KB comprimido) só carrega nas telas com mapa. As fotos saem do aparelho com no máximo 1280 px, em JPEG.
-
-## Limitações conhecidas
-
-- **Dias de encontro**: as datas em `src/domain/encounters.ts` são provisórias (24/10, 31/10, 07/11 e 14/11).
-- **"Cadastros"** nos indicadores conta as contas confirmadas, sem contar a equipe.
-- **Fotos**: são reduzidas para no máximo 1280 px e convertidas para JPEG no próprio aparelho (isso tira o GPS escondido na foto). Ninguém borra rostos automaticamente: a equipe tira do ar o que precisar.
-
-## Pendências de conteúdo
-
-Ficam em `src/domain/project.ts` e aparecem como `[placeholder]` nas telas até alguém preencher:
-
-- Associação e data/horário de cada um dos 4 encontros (`ENCOUNTERS`).
-- @ do perfil do Instagram (`PROJECT_INSTAGRAM`).
-- E-mail de contato do projeto para pedidos de remoção e LGPD (`PROJECT_CONTACT_EMAIL`).
-- Revisão final dos textos de `/privacidade` e `/termos`.
-
-## Stack
-
-React + Vite + TypeScript, Tailwind CSS 4, React Router, Mapbox (`mapbox-gl` + `react-map-gl`), zod e Supabase (Postgres com PostGIS, Auth, Storage e RLS). Os tokens de cor, fonte, raio e sombra do design ficam em `src/styles/index.css`, no bloco `@theme`.
-
-## Estrutura
-
-```
-src/
-├─ app/          rotas e layouts (cabeçalhos desktop, navegação mobile)
-├─ components/   marca, ícones e componentes reutilizados (botão, chip, pino…)
-├─ data/         repositórios que falam com o Supabase
-├─ domain/       tipos, categorias, situações e cálculos puros
-├─ features/     uma pasta por funcionalidade (map, mark-problem, occurrence-detail, indicators, team)
-├─ lib/          utilitários (cliente do Supabase, geocodificação, foto, media query)
-├─ pages/        uma tela por rota
-└─ styles/       tokens e estilos globais
-supabase/
-├─ migrations/   banco, regras de acesso, funções e storage
-├─ tests/        testes das regras de segurança (pgTAP)
-└─ seed.sql      relatos de exemplo para o Supabase local
-```
-
-A pasta `src/data/` é a única que sabe de onde vêm os dados: as telas não conhecem o Supabase. Tudo que depende do Mapbox fica em `src/features/map/engine/` e `src/lib/geocoding.ts`.
-
-## Andamento
-
-O projeto é construído em etapas, seguindo o briefing e o design no Claude Design.
-
-- [x] Etapa 0 · Fundação: projeto, tokens, fontes, ícones, cabeçalhos e rotas
-- [x] Etapa 1 · Componentes base: botões, chips, selos, pinos, cards e a vitrine `/dev/componentes`
-- [x] Etapa 2 · Mapa: Mapbox com as cores do design, filtros, busca, lista e seleção
-- [x] Etapa 3 · Marcar problema: GPS ou mapa, categoria, foto, descrição e aviso de parecido
-- [x] Etapa 4 · Detalhe da ocorrência: confirmação, linha do tempo, parecidos e denúncia
-- [x] Etapa 5 · Indicadores: metas, gráficos, filtros e CSV
-- [x] Etapa 6 · Painel da equipe: fila, situação, repasse, nota, duplicados e inválidos
-- [x] Etapa 7 · Início e Entrar: página inicial, menu do celular, tela de entrar, privacidade e termos
-- [x] Etapa 8 · Supabase: banco com PostGIS, regras de acesso, login, fotos e painel da equipe de verdade
-- [ ] Etapa 9 · Testes e entrega
-  - [x] Testes da lógica, fluxos principais, acessibilidade e celular de entrada
-  - [ ] Formulários SUS e NPS
-  - [x] Prévia de link (WhatsApp), ícones PNG, robots, sitemap e `vercel.json`
-  - [x] Deploy na Vercel (https://inframap-g3.vercel.app), com Supabase, Google e prévia de link apontando para o domínio
+<p align="center">
+  <a href="https://inframap-g3.vercel.app"><b>Abrir o InfraMap</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://inframap-g3.vercel.app/privacidade">Privacidade</a>
+</p>

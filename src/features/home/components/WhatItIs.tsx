@@ -9,7 +9,7 @@ const is = [
 const isNot = [
   'Não é canal oficial da prefeitura.',
   'Não garante conserto nem prazo.',
-  'Não mostra seu nome nem rosto de ninguém nas fotos.',
+  'Não mostra seu nome completo nem seu e-mail.',
 ]
 
 export function WhatItIs() {

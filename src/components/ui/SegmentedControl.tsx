@@ -10,6 +10,21 @@ interface SegmentedControlProps<T extends string> {
   options: SegmentOption<T>[]
   value: T
   onChange: (value: T) => void
+  tone?: 'light' | 'dark'
+  size?: 'sm' | 'md'
+}
+
+const tones = {
+  light: {
+    track: 'bg-meio-fio',
+    checked: 'bg-branco text-asfalto shadow-[0_1px_0_#CFC8B8]',
+    idle: 'text-asfalto hover:bg-branco/50',
+  },
+  dark: {
+    track: 'bg-asfalto-2',
+    checked: 'bg-faixa text-asfalto',
+    idle: 'text-giz hover:bg-asfalto',
+  },
 }
 
 const nextIndexByKey: Record<string, (index: number, length: number) => number> = {
@@ -26,6 +41,8 @@ export function SegmentedControl<T extends string>({
   options,
   value,
   onChange,
+  tone = 'light',
+  size = 'sm',
 }: SegmentedControlProps<T>) {
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([])
 
@@ -45,7 +62,7 @@ export function SegmentedControl<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className="grid gap-1 rounded-control bg-meio-fio p-1"
+      className={`grid gap-1 rounded-control p-1 ${tones[tone].track}`}
       style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
     >
       {options.map((option, index) => {
@@ -62,8 +79,8 @@ export function SegmentedControl<T extends string>({
             tabIndex={checked ? 0 : -1}
             onClick={() => onChange(option.value)}
             onKeyDown={handleKeyDown}
-            className={`h-9 rounded-[9px] px-1 text-[13px] font-bold text-asfalto ${
-              checked ? 'bg-branco shadow-[0_1px_0_#CFC8B8]' : 'hover:bg-branco/50'
+            className={`rounded-[9px] px-1 font-bold ${size === 'md' ? 'h-10 px-3.5 text-sm' : 'h-9 text-[13px]'} ${
+              checked ? tones[tone].checked : tones[tone].idle
             }`}
           >
             {option.label}

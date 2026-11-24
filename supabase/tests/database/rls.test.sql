@@ -2,26 +2,50 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(19);
+select plan(26);
 
 insert into auth.users (id, instance_id, aud, role, email, is_anonymous, created_at, updated_at) values
-  ('11111111-1111-4111-8111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', null, true, now(), now()),
-  ('22222222-2222-4222-8222-222222222222', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', null, true, now(), now()),
-  ('33333333-3333-4333-8333-333333333333', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'equipe@teste.local', false, now(), now());
+  ('11111111-1111-4111-8111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'maria@teste.local', false, now(), now()),
+  ('22222222-2222-4222-8222-222222222222', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'joao@teste.local', false, now(), now()),
+  ('33333333-3333-4333-8333-333333333333', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'equipe@teste.local', false, now(), now()),
+  ('44444444-4444-4444-8444-444444444444', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', null, true, now(), now());
+update public.profiles set display_name = 'Maria da Silva Souza' where id = '11111111-1111-4111-8111-111111111111';
+insert into auth.users (id, instance_id, aud, role, email, is_anonymous, created_at, updated_at, raw_user_meta_data) values
+  ('55555555-5555-4555-8555-555555555555', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'google@teste.local', false, now(), now(), '{"full_name": "Ana Paula Lima"}');
+update auth.users set email_confirmed_at = now() where not is_anonymous and email like '%@teste.local';
 insert into public.staff (user_id) values ('33333333-3333-4333-8333-333333333333');
 
 create temporary table ids (name text primary key, id bigint);
 grant all on ids to anon, authenticated;
 
+select is(
+  (select display_name from public.profiles where id = '55555555-5555-4555-8555-555555555555'),
+  'Ana Paula Lima',
+  'quem entra com Google já ganha o nome no perfil'
+);
+
 set local role authenticated;
-set local request.jwt.claims = '{"sub": "11111111-1111-4111-8111-111111111111", "role": "authenticated"}';
+set local request.jwt.claims = '{"sub": "44444444-4444-4444-8444-444444444444", "role": "authenticated", "is_anonymous": true}';
+
+select throws_ok(
+  $$ insert into public.occurrences (category_id, title, neighborhood, location)
+     values ('vias', 'Sessão anônima', 'Centro', 'SRID=4326;POINT(-44.447 -22.468)') $$,
+  '42501',
+  null,
+  'sessão anônima não marca problema'
+);
+
+set local request.jwt.claims = '{"sub": "11111111-1111-4111-8111-111111111111", "role": "authenticated", "is_anonymous": false}';
 
 insert into public.occurrences (category_id, title, neighborhood, location)
 values ('vias', 'Buraco de teste', 'Centro', 'SRID=4326;POINT(-44.447 -22.468)');
 insert into ids select 'mine', max(id) from public.occurrences_public where is_mine;
+insert into public.occurrences (category_id, title, neighborhood, location, anonymous)
+values ('vias', 'Buraco sem nome', 'Centro', 'SRID=4326;POINT(-44.46 -22.47)', true);
+insert into ids select 'hidden', max(id) from public.occurrences_public where is_mine;
 
 select is(
-  (select count(*)::integer from public.occurrences_public where is_mine),
+  (select count(*)::integer from public.occurrences_public where is_mine and id = (select id from ids where name = 'mine')),
   1,
   'morador cria relato e ele nasce como dele'
 );
@@ -67,7 +91,22 @@ select is_empty(
   'morador não lê denúncias'
 );
 
-set local request.jwt.claims = '{"sub": "22222222-2222-4222-8222-222222222222", "role": "authenticated"}';
+set local request.jwt.claims = '{"sub": "44444444-4444-4444-8444-444444444444", "role": "authenticated", "is_anonymous": true}';
+
+select throws_ok(
+  $$ insert into public.confirmations (occurrence_id) values ((select id from ids where name = 'mine')) $$,
+  '42501',
+  null,
+  'sessão anônima não confirma'
+);
+select throws_ok(
+  $$ insert into public.content_reports (occurrence_id, reason) values ((select id from ids where name = 'mine'), 'ofensivo') $$,
+  '42501',
+  null,
+  'sessão anônima não denuncia'
+);
+
+set local request.jwt.claims = '{"sub": "22222222-2222-4222-8222-222222222222", "role": "authenticated", "is_anonymous": false}';
 
 insert into public.confirmations (occurrence_id) values ((select id from ids where name = 'mine'));
 select is(
@@ -107,10 +146,20 @@ select ok(
   (select count(*) from public.indicator_records) > 0,
   'visitante vê os indicadores'
 );
+select is(
+  (select author_name from public.occurrences_public where id = (select id from ids where name = 'mine')),
+  'Maria S.',
+  'relato com nome mostra primeiro nome e inicial'
+);
+select is(
+  (select author_name from public.occurrences_public where id = (select id from ids where name = 'hidden')),
+  null,
+  'relato com nome oculto não mostra o autor'
+);
 
 reset role;
 set local role authenticated;
-set local request.jwt.claims = '{"sub": "33333333-3333-4333-8333-333333333333", "role": "authenticated"}';
+set local request.jwt.claims = '{"sub": "33333333-3333-4333-8333-333333333333", "role": "authenticated", "is_anonymous": false}';
 
 select lives_ok(
   $$ select public.team_update_occurrence((select id from ids where name = 'mine'), 'andamento', 'Prefeitura · Obras', 'Repassado.') $$,
@@ -149,6 +198,11 @@ select is(
   (select duplicate_of from public.occurrences_public where id = (select id from ids where name = 'copy')),
   (select id from ids where name = 'mine'),
   'duplicado continua legível e aponta para o original'
+);
+
+select ok(
+  public.registered_residents() >= 3,
+  'cadastros contam contas confirmadas'
 );
 
 select * from finish();

@@ -4,11 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light" />
-    <title>Seu link para entrar no InfraMap</title>
+    <title>Seu código para entrar no InfraMap</title>
   </head>
   <body style="margin: 0; padding: 0; background: #f1eee7">
     <div style="display: none; max-height: 0; overflow: hidden">
-      Toque no botão para entrar no InfraMap. O link vale por 1 hora.
+      Seu código para entrar no InfraMap chegou. Ele vale por 1 hora.
     </div>
     <table
       role="presentation"
@@ -96,12 +96,11 @@
                     letter-spacing: -0.5px;
                   "
                 >
-                  Seu link para entrar
+                  Seu código para entrar
                 </h1>
                 <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.5; color: #3c3a35">
-                  Alguém pediu para entrar no InfraMap com
-                  <strong style="color: #1c1f1e">{{ .Email }}</strong>. Toque no botão e pronto, sem
-                  senha.
+                  Para entrar no InfraMap com <strong style="color: #1c1f1e">{{ .Email }}</strong>,
+                  digite este código na tela de entrar:
                 </p>
               </td>
             </tr>
@@ -115,21 +114,15 @@
                         border: 2px solid #1c1f1e;
                         border-radius: 14px;
                         box-shadow: 0 3px 0 #1c1f1e;
+                        padding: 14px 26px;
+                        font-family: 'JetBrains Mono', Consolas, monospace;
+                        font-size: 34px;
+                        font-weight: 700;
+                        letter-spacing: 10px;
+                        color: #1c1f1e;
                       "
                     >
-                      <a
-                        href="{{ .ConfirmationURL }}"
-                        style="
-                          display: inline-block;
-                          padding: 15px 26px;
-                          font-family: Archivo, 'Helvetica Neue', Arial, sans-serif;
-                          font-size: 17px;
-                          font-weight: 800;
-                          color: #1c1f1e;
-                          text-decoration: none;
-                        "
-                        >Entrar no InfraMap →</a
-                      >
+                      {{ .Token }}
                     </td>
                   </tr>
                 </table>
@@ -143,7 +136,7 @@
                 "
               >
                 <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #5e5a52">
-                  Não foi você? Pode ignorar este e-mail: sem o clique, ninguém entra na sua conta.
+                  Não foi você? Pode ignorar este e-mail: sem o código, ninguém entra na sua conta.
                 </p>
               </td>
             </tr>
@@ -158,8 +151,8 @@
                     color: #5e5a52;
                   "
                 >
-                  O link vale por 1 hora. Se o botão não funcionar, copie e cole:<br />
-                  <span style="word-break: break-all; color: #1c1f1e">{{ .ConfirmationURL }}</span>
+                  O código vale por 1 hora e só funciona uma vez.<br />
+                  Ninguém da equipe do InfraMap vai pedir esse código.
                 </p>
               </td>
             </tr>

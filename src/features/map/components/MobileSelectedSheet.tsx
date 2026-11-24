@@ -16,7 +16,7 @@ export function MobileSelectedSheet({
   onToggleConfirmation,
 }: MobileSelectedSheetProps) {
   return (
-    <div className="absolute inset-x-0 bottom-[calc(84px+env(safe-area-inset-bottom))] z-10 px-3 md:hidden">
+    <div className="absolute inset-x-0 bottom-[calc(102px+env(safe-area-inset-bottom))] z-10 px-3 md:hidden">
       <BottomSheet key={occurrence.id} label="Ocorrência selecionada">
         <div className="flex items-start gap-3">
           {occurrence.photoUrl ? (

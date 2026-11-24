@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Link } from 'react-router'
 import { StrokeIcon } from '@/components/icons/StrokeIcon'
 
@@ -9,6 +10,15 @@ interface FlowHeaderProps {
 }
 
 export function FlowHeader({ step, totalSteps, title, onBack }: FlowHeaderProps) {
+  const titleRef = useRef<HTMLHeadingElement>(null)
+  const firstStep = useRef(step)
+
+  // The button that moved the flow forward may be disabled or gone on the next
+  // step, so focus goes to the new step title instead of falling to <body>.
+  useEffect(() => {
+    if (step !== firstStep.current) titleRef.current?.focus()
+  }, [step])
+
   return (
     <header className="relative z-3 flex shrink-0 flex-col gap-3.5 bg-concreto px-4 pt-[calc(16px+env(safe-area-inset-top))] pb-3">
       <div className="flex items-center gap-3">
@@ -24,7 +34,9 @@ export function FlowHeader({ step, totalSteps, title, onBack }: FlowHeaderProps)
           <span className="font-mono text-xs text-brita">
             Passo {step} de {totalSteps}
           </span>
-          <h1 className="text-lg font-extrabold">{title}</h1>
+          <h1 ref={titleRef} tabIndex={-1} className="text-lg font-extrabold outline-none">
+            {title}
+          </h1>
         </div>
         <Link to="/mapa" className="py-3 text-sm font-semibold text-brita">
           Cancelar

@@ -1,3 +1,4 @@
+import { MAIN_CONTENT_ID } from '@/components/layout/mainContent'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { EncountersSection } from '@/features/home/components/EncountersSection'
 import { HomeHeader } from '@/features/home/components/HomeHeader'
@@ -12,7 +13,7 @@ export default function HomePage() {
       <div data-surface="dark" className="bg-asfalto text-concreto">
         <HomeHeader />
       </div>
-      <main>
+      <main id={MAIN_CONTENT_ID} tabIndex={-1} className="outline-none">
         <HomeHero />
         <HowItWorks />
         <WhatItIs />

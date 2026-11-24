@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useOccurrences } from '@/data/useOccurrences'
 import type { LatLng } from '@/domain/types'
 import { Toast } from '@/components/ui/Toast'
@@ -26,6 +26,17 @@ export default function MapPage() {
 
   const visible = useMemo(() => filterOccurrences(occurrences, filters), [occurrences, filters])
   const selected = visible.find((occurrence) => occurrence.id === selectedId) ?? null
+
+  useEffect(() => {
+    if (!selectedId) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.defaultPrevented) return
+      document.querySelector<HTMLElement>('.mapboxgl-marker [aria-pressed="true"]')?.focus()
+      select(null)
+    }
+    document.addEventListener('keydown', closeOnEscape)
+    return () => document.removeEventListener('keydown', closeOnEscape)
+  }, [selectedId, select])
 
   return (
     <div className="fixed inset-0 flex md:relative md:inset-auto md:h-[calc(100dvh-4.25rem)]">

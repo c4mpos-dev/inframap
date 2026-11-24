@@ -1,7 +1,10 @@
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useCallback, useEffect, useImperativeHandle, useRef, useState, type Ref } from 'react'
 import MapGL, { AttributionControl, Marker, type MapRef } from 'react-map-gl/mapbox'
+import type { Marker as MapboxMarker } from 'mapbox-gl'
 import { prefersReducedMotion } from '@/lib/motion'
+import { getCategory } from '@/domain/categories'
+import { getStatus } from '@/domain/statuses'
 import { RESENDE_CENTER } from '@/domain/resende'
 import type { LatLng, Occurrence } from '@/domain/types'
 import { MapPin } from '@/components/ui/MapPin'
@@ -15,6 +18,18 @@ const FOCUS_ZOOM = 15
 const MAP_STYLE = 'mapbox://styles/mapbox/light-v11'
 const DESKTOP_FOCUS_PADDING = { top: 80, bottom: 80, left: 80, right: 80 }
 const MOBILE_FOCUS_PADDING = { top: 140, bottom: 300, left: 40, right: 40 }
+
+// Mapbox wraps every marker in role="img" aria-label="Map marker", which hides
+// the pin button inside it from screen readers.
+function unwrapMarker(marker: MapboxMarker | null) {
+  const element = marker?.getElement()
+  element?.removeAttribute('role')
+  element?.removeAttribute('aria-label')
+}
+
+function describePin(occurrence: Occurrence): string {
+  return `${occurrence.title}. ${getCategory(occurrence.categoryId).label}, ${getStatus(occurrence.status).label.toLowerCase()}`
+}
 
 export interface MapViewHandle {
   zoomIn: () => void
@@ -108,6 +123,7 @@ export function MapView({
         return (
           <Marker
             key={occurrence.id}
+            ref={unwrapMarker}
             latitude={occurrence.location.lat}
             longitude={occurrence.location.lng}
             anchor="bottom"
@@ -119,7 +135,7 @@ export function MapView({
           >
             <button
               type="button"
-              aria-label={occurrence.title}
+              aria-label={describePin(occurrence)}
               aria-pressed={selected}
               className="block cursor-pointer rounded-md"
             >
@@ -135,7 +151,12 @@ export function MapView({
         )
       })}
       {userLocation && (
-        <Marker latitude={userLocation.lat} longitude={userLocation.lng} anchor="center">
+        <Marker
+          ref={unwrapMarker}
+          latitude={userLocation.lat}
+          longitude={userLocation.lng}
+          anchor="center"
+        >
           <UserLocationDot />
         </Marker>
       )}

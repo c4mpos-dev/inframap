@@ -217,7 +217,7 @@ select is(
   'equipe vê o relato inválido na aba de inválidos'
 );
 select throws_ok(
-  $ select public.team_delete_occurrence((select id from ids where name = 'mine')) $,
+  $$ select public.team_delete_occurrence((select id from ids where name = 'mine')) $$,
   '42501',
   null,
   'equipe sem ser admin não apaga relato'

@@ -7,7 +7,6 @@ import { SelectField } from './SelectField'
 const periodOptions: { value: IndicatorPeriod; label: string }[] = [
   { value: '4s', label: '4 semanas' },
   { value: 'tudo', label: 'Desde o início' },
-  { value: 'encontros', label: 'Dias de encontro' },
 ]
 
 const ALL = 'todos'

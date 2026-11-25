@@ -2,6 +2,7 @@ import { Link } from 'react-router'
 import { StrokeIcon } from '@/components/icons/StrokeIcon'
 import { iconPaths } from '@/components/icons/paths'
 import { RoadStripe } from '@/components/ui/RoadStripe'
+import { TiltOnHover } from '@/components/ui/TiltOnHover'
 import { HeroMapCard } from './HeroMapCard'
 
 export function HomeHero() {
@@ -63,7 +64,9 @@ export function HomeHero() {
           </span>
         </div>
         <div className="hidden flex-[1_1_400px] justify-center md:flex">
-          <HeroMapCard />
+          <TiltOnHover>
+            <HeroMapCard />
+          </TiltOnHover>
         </div>
       </section>
       <RoadStripe className="h-10 md:h-12" />

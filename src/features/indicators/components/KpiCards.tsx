@@ -1,5 +1,8 @@
 import type { Indicators } from '@/domain/indicators'
+import { CountUp } from '@/components/ui/CountUp'
 import { formatDecimal, formatPercent } from '../format'
+
+const formatCount = (value: number) => String(Math.round(value))
 
 const REPORTS_GOAL = 80
 const RESIDENTS_GOAL = 50
@@ -20,19 +23,22 @@ export function KpiCards({ indicators, registeredResidents, variant }: KpiCardsP
   const cards = [
     {
       label: desktop ? 'Relatos no mapa' : 'Relatos',
-      value: String(indicators.total),
+      value: indicators.total,
+      format: formatCount,
       note: goalNote(indicators.total, REPORTS_GOAL, desktop ? 'Meta do projeto:' : 'meta'),
       className: desktop ? 'bg-asfalto text-concreto' : 'bg-faixa text-asfalto',
     },
     {
       label: desktop ? 'Moradores cadastrados' : 'Cadastros',
-      value: String(registeredResidents),
+      value: registeredResidents,
+      format: formatCount,
       note: goalNote(registeredResidents, RESIDENTS_GOAL, desktop ? 'Meta:' : 'meta'),
       className: desktop ? 'bg-faixa text-asfalto' : 'bg-branco text-asfalto',
     },
     {
       label: desktop ? 'Com foto e descrição' : 'Com foto',
-      value: formatPercent(indicators.withPhotoAndDescriptionShare),
+      value: indicators.withPhotoAndDescriptionShare,
+      format: formatPercent,
       note: desktop
         ? `${indicators.withPhotoAndDescription} de ${indicators.total} relatos`
         : 'e descrição',
@@ -40,7 +46,8 @@ export function KpiCards({ indicators, registeredResidents, variant }: KpiCardsP
     },
     {
       label: desktop ? 'Confirmações por relato' : 'Confirmações',
-      value: formatDecimal(indicators.confirmationsPerReport),
+      value: indicators.confirmationsPerReport,
+      format: formatDecimal,
       note: desktop ? 'Média de “eu também vi”' : 'por relato',
       className: 'bg-branco text-asfalto',
     },
@@ -69,7 +76,7 @@ export function KpiCards({ indicators, registeredResidents, variant }: KpiCardsP
               desktop ? 'text-5xl' : 'text-4xl'
             }`}
           >
-            {card.value}
+            <CountUp value={card.value} format={card.format} />
           </span>
           <span className={`mt-auto opacity-80 ${desktop ? 'text-[13px]' : 'text-xs'}`}>
             {card.note}

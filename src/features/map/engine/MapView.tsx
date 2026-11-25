@@ -8,14 +8,14 @@ import { getStatus } from '@/domain/statuses'
 import { RESENDE_CENTER } from '@/domain/resende'
 import type { LatLng, Occurrence } from '@/domain/types'
 import { MapPin } from '@/components/ui/MapPin'
-import { applyDesignTheme } from './designTheme'
+import { getMapStyle, themeMapStyle } from './mapStyles'
+import { useMapStyle } from '../useMapStyle'
 import { MapUnavailable } from './MapUnavailable'
 import { UserLocationDot } from './UserLocationDot'
 import { addViaDutraLayer } from './viaDutraLayer'
 
 const INITIAL_ZOOM = 13.2
 const FOCUS_ZOOM = 15
-const MAP_STYLE = 'mapbox://styles/mapbox/light-v11'
 const DESKTOP_FOCUS_PADDING = { top: 80, bottom: 80, left: 80, right: 80 }
 const MOBILE_FOCUS_PADDING = { top: 140, bottom: 300, left: 40, right: 40 }
 
@@ -60,6 +60,11 @@ export function MapView({
   const mapRef = useRef<MapRef>(null)
   const stopDashRef = useRef<() => void>(() => {})
   const [loaded, setLoaded] = useState(false)
+  const [styleId] = useMapStyle()
+  const styleIdRef = useRef(styleId)
+  useEffect(() => {
+    styleIdRef.current = styleId
+  }, [styleId])
 
   const flyTo = useCallback(({ lat, lng }: LatLng) => {
     const map = mapRef.current
@@ -90,11 +95,18 @@ export function MapView({
     }
   }, [loaded, selectedLat, selectedLng, flyTo])
 
+  // Runs on the first load and again every time the person switches the map type,
+  // because a new style wipes custom paint and the Via Dutra layer.
   const handleLoad = useCallback(() => {
     const map = mapRef.current?.getMap()
     if (!map) return
-    applyDesignTheme(map)
-    stopDashRef.current = addViaDutraLayer(map, !prefersReducedMotion())
+    const decorate = () => {
+      themeMapStyle(map, styleIdRef.current)
+      stopDashRef.current()
+      stopDashRef.current = addViaDutraLayer(map, !prefersReducedMotion())
+    }
+    decorate()
+    map.on('style.load', decorate)
     setLoaded(true)
   }, [])
 
@@ -106,7 +118,7 @@ export function MapView({
     <MapGL
       ref={mapRef}
       mapboxAccessToken={token}
-      mapStyle={MAP_STYLE}
+      mapStyle={getMapStyle(styleId).url}
       initialViewState={{
         latitude: RESENDE_CENTER.lat,
         longitude: RESENDE_CENTER.lng,
@@ -137,7 +149,7 @@ export function MapView({
               type="button"
               aria-label={describePin(occurrence)}
               aria-pressed={selected}
-              className="block cursor-pointer rounded-md"
+              className="block cursor-pointer rounded-md transition-transform duration-200 ease-out motion-safe:hover:-translate-y-1.5 motion-safe:hover:scale-110"
             >
               <MapPin
                 categoryId={occurrence.categoryId}

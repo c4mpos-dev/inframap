@@ -83,9 +83,13 @@ export function WeeklyChart({ weeks, variant }: WeeklyChartProps) {
         })}
       </div>
       {!desktop && (
-        <div className="flex justify-between font-mono text-[11px] text-brita">
+        <div
+          className={`flex font-mono text-[11px] text-brita ${
+            weeks.length > 1 ? 'justify-between' : 'justify-center'
+          }`}
+        >
           <span>{weeks[0]?.label}</span>
-          <span>{weeks[weeks.length - 1]?.label}</span>
+          {weeks.length > 1 && <span>{weeks[weeks.length - 1]?.label}</span>}
         </div>
       )}
     </div>

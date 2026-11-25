@@ -1,0 +1,60 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 540px;
+        height: 540px;
+        overflow: hidden;
+      }
+      body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* Instagram shows profile photos as a circle: everything stays inside 76% of it. */
+      svg {
+        width: 540px;
+        height: 540px;
+      }
+    </style>
+  </head>
+  <body>
+    <svg id="logo" viewBox="0 0 540 540" aria-hidden="true">
+      <rect id="bg" width="540" height="540" />
+      <g transform="translate(270 270) scale(0.84) translate(-270 -290)">
+        <g transform="translate(270 262)">
+          <path
+            id="pin"
+            d="M0 -170C-84 -170 -150 -104 -150 -20C-150 80 0 180 0 180C0 180 150 80 150 -20C150 -104 84 -170 0 -170Z"
+          />
+          <path
+            id="crack"
+            d="M-8 -170L30 -103L-20 -57L26 -7L-3 33"
+            fill="none"
+            stroke-width="25"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </g>
+        <g id="stripes" transform="translate(270 478)">
+          <rect x="-117" y="-11" width="62" height="22" rx="11" />
+          <rect x="-31" y="-11" width="62" height="22" rx="11" />
+          <rect x="55" y="-11" width="62" height="22" rx="11" />
+        </g>
+      </g>
+    </svg>
+    <script>
+      const tone = new URLSearchParams(location.search).get('tone') || 'asfalto'
+      const tile = tone === 'faixa' ? '#FFC21A' : '#1C1F1E'
+      const ink = tone === 'faixa' ? '#1C1F1E' : '#FFC21A'
+      document.getElementById('bg').setAttribute('fill', tile)
+      document.getElementById('pin').setAttribute('fill', ink)
+      document.getElementById('crack').setAttribute('stroke', tile)
+      document.querySelectorAll('#stripes rect').forEach((r) => r.setAttribute('fill', ink))
+    </script>
+  </body>
+</html>

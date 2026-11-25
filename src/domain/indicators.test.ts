@@ -45,10 +45,6 @@ describe('filterRecords', () => {
     expect(filterRecords(records, filters({ period: '4s' }), now)).toHaveLength(2)
   })
 
-  it('encontros só pega os dias dos encontros', () => {
-    expect(filterRecords(records, filters({ period: 'encontros' }), now)).toHaveLength(1)
-  })
-
   it('filtra por bairro e categoria', () => {
     expect(filterRecords(records, filters({ neighborhood: 'Paraíso' }), now)).toHaveLength(2)
     expect(

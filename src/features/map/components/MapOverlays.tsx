@@ -2,6 +2,7 @@ import { StrokeIcon } from '@/components/icons/StrokeIcon'
 import { iconPaths } from '@/components/icons/paths'
 import { statuses } from '@/domain/statuses'
 import { StatusGlyph } from '@/components/icons/StatusGlyph'
+import { MapStylePicker } from './MapStylePicker'
 
 export function StatusLegend() {
   return (
@@ -31,24 +32,30 @@ interface MapControlsProps {
 export function MapControls({ onZoomIn, onZoomOut, onLocate, locating }: MapControlsProps) {
   const buttonClass = 'flex size-11 items-center justify-center hover:bg-concreto'
   return (
-    <div className="absolute top-5 right-5 z-10 hidden flex-col overflow-hidden rounded-control bg-branco shadow-[0_2px_0_#D3CBB9] md:flex">
-      <button type="button" aria-label="Aproximar" onClick={onZoomIn} className={buttonClass}>
-        <StrokeIcon path="M12 5v14M5 12h14" size={18} strokeWidth={2.4} />
-      </button>
-      <span className="h-px bg-meio-fio" />
-      <button type="button" aria-label="Afastar" onClick={onZoomOut} className={buttonClass}>
-        <StrokeIcon path="M5 12h14" size={18} strokeWidth={2.4} />
-      </button>
-      <span className="h-px bg-meio-fio" />
-      <button
-        type="button"
-        aria-label="Ir para minha localização"
-        aria-busy={locating}
-        onClick={onLocate}
-        className={`${buttonClass} text-andamento`}
-      >
-        <StrokeIcon path={iconPaths.locate} size={18} strokeWidth={2.2} />
-      </button>
+    <div className="absolute top-5 right-5 z-10 hidden flex-col gap-2.5 md:flex">
+      <div className="flex flex-col overflow-hidden rounded-control bg-branco shadow-[0_2px_0_#D3CBB9]">
+        <button type="button" aria-label="Aproximar" onClick={onZoomIn} className={buttonClass}>
+          <StrokeIcon path="M12 5v14M5 12h14" size={18} strokeWidth={2.4} />
+        </button>
+        <span className="h-px bg-meio-fio" />
+        <button type="button" aria-label="Afastar" onClick={onZoomOut} className={buttonClass}>
+          <StrokeIcon path="M5 12h14" size={18} strokeWidth={2.4} />
+        </button>
+        <span className="h-px bg-meio-fio" />
+        <button
+          type="button"
+          aria-label="Ir para minha localização"
+          aria-busy={locating}
+          onClick={onLocate}
+          className={`${buttonClass} text-andamento`}
+        >
+          <StrokeIcon path={iconPaths.locate} size={18} strokeWidth={2.2} />
+        </button>
+      </div>
+      <MapStylePicker
+        placement="left"
+        buttonClassName="size-11 rounded-control bg-branco shadow-[0_2px_0_#D3CBB9] hover:bg-concreto aria-expanded:bg-asfalto aria-expanded:text-faixa"
+      />
     </div>
   )
 }

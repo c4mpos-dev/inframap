@@ -1,9 +1,8 @@
 import { categories } from './categories'
-import { ENCOUNTER_DATES } from './encounters'
 import { statuses } from './statuses'
 import type { CategoryId, Occurrence, StatusId } from './types'
 
-export type IndicatorPeriod = '4s' | 'encontros' | 'tudo'
+export type IndicatorPeriod = '4s' | 'tudo'
 
 export interface IndicatorRecord {
   createdAt: string
@@ -60,13 +59,6 @@ export function toIndicatorRecord(occurrence: Occurrence): IndicatorRecord {
   }
 }
 
-function toLocalDay(isoDate: string): string {
-  const date = new Date(isoDate)
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  return `${date.getFullYear()}-${month}-${day}`
-}
-
 function startOfWeek(date: Date): Date {
   const start = new Date(date.getFullYear(), date.getMonth(), date.getDate())
   const weekday = (start.getDay() + 6) % 7
@@ -76,7 +68,6 @@ function startOfWeek(date: Date): Date {
 
 function inPeriod(record: IndicatorRecord, period: IndicatorPeriod, now: Date): boolean {
   if (period === 'tudo') return true
-  if (period === 'encontros') return ENCOUNTER_DATES.includes(toLocalDay(record.createdAt))
   const firstWeek = startOfWeek(now).getTime() - (RECENT_WEEKS - 1) * 7 * DAY_MS
   return new Date(record.createdAt).getTime() >= firstWeek
 }

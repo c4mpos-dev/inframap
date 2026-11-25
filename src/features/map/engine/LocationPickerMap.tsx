@@ -1,13 +1,13 @@
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { useCallback, useImperativeHandle, useRef, type Ref } from 'react'
+import { useCallback, useEffect, useImperativeHandle, useRef, type Ref } from 'react'
 import MapGL, { AttributionControl, type MapRef } from 'react-map-gl/mapbox'
 import type { LatLng } from '@/domain/types'
 import { prefersReducedMotion } from '@/lib/motion'
-import { applyDesignTheme } from './designTheme'
+import { getMapStyle, themeMapStyle } from './mapStyles'
+import { useMapStyle } from '../useMapStyle'
 import { MapUnavailable } from './MapUnavailable'
 
 const PICK_ZOOM = 16.5
-const MAP_STYLE = 'mapbox://styles/mapbox/light-v11'
 
 export interface LocationPickerHandle {
   moveTo: (location: LatLng) => void
@@ -28,6 +28,11 @@ export function LocationPickerMap({
 }: LocationPickerMapProps) {
   const token = import.meta.env.VITE_MAPBOX_TOKEN
   const mapRef = useRef<MapRef>(null)
+  const [styleId] = useMapStyle()
+  const styleIdRef = useRef(styleId)
+  useEffect(() => {
+    styleIdRef.current = styleId
+  }, [styleId])
 
   const moveTo = useCallback(({ lat, lng }: LatLng) => {
     mapRef.current?.easeTo({
@@ -42,7 +47,8 @@ export function LocationPickerMap({
   const handleLoad = useCallback(() => {
     const map = mapRef.current?.getMap()
     if (!map) return
-    applyDesignTheme(map)
+    themeMapStyle(map, styleIdRef.current)
+    map.on('style.load', () => themeMapStyle(map, styleIdRef.current))
     const { lat, lng } = map.getCenter()
     onMoveEnd({ lat, lng })
   }, [onMoveEnd])
@@ -53,7 +59,7 @@ export function LocationPickerMap({
     <MapGL
       ref={mapRef}
       mapboxAccessToken={token}
-      mapStyle={MAP_STYLE}
+      mapStyle={getMapStyle(styleId).url}
       initialViewState={{
         latitude: initialCenter.lat,
         longitude: initialCenter.lng,

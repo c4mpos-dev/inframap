@@ -13,6 +13,7 @@
   <img src="https://img.shields.io/badge/projeto_de_extensão-AEDB-1C1F1E?style=flat-square" alt="Projeto de extensão da AEDB" />
   <img src="https://img.shields.io/badge/ODS-9.1-1D5FD1?style=flat-square" alt="ODS 9.1" />
   <img src="https://img.shields.io/badge/gratuito-sempre-157A4F?style=flat-square" alt="Gratuito" />
+  <a href="https://www.instagram.com/inframap.g3/"><img src="https://img.shields.io/badge/instagram-@inframap.g3-C13584?style=flat-square" alt="Instagram @inframap.g3" /></a>
 </p>
 
 <br />
@@ -30,7 +31,7 @@ O **InfraMap** é o lugar para essa reclamação não se perder. Você marca o p
 
 ## Como funciona
 
-**1. Viu? Marca.** Abra o site no celular, toque no **+** amarelo e arraste o mapa até o ponto do problema. Se o GPS estiver ligado, ele já começa onde você está. Escolha a categoria, tire uma foto se der e conte em uma frase o que está acontecendo. Leva menos de um minuto.
+**1. Viu? Marca.** Abra o site no celular, toque no **+** amarelo e arraste o mapa até o ponto do problema. Se o GPS estiver ligado, ele já começa onde você está. Escolha a categoria, tire uma foto se der e conte em uma frase o que está acontecendo. Leva menos de um minuto. Se preferir, troque o tipo do mapa no botão de camadas: o padrão do InfraMap, um mapa de ruas colorido ou um escuro.
 
 **2. A vizinhança confirma.** Quem passa pelo mesmo lugar toca em **"Eu também vi"**. Com 5 confirmações, o relato ganha o selo de confirmado pela vizinhança. Um buraco que 30 pessoas confirmaram pesa mais do que uma reclamação solta.
 
@@ -172,6 +173,8 @@ O projeto se apoia no Objetivo de Desenvolvimento Sustentável 9.1 da ONU: infra
 
 <p align="center">
   <a href="https://inframap-g3.vercel.app"><b>Abrir o InfraMap</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://www.instagram.com/inframap.g3/">Instagram</a>
   &nbsp;·&nbsp;
   <a href="https://inframap-g3.vercel.app/privacidade">Privacidade</a>
   &nbsp;·&nbsp;

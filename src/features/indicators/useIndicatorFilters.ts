@@ -3,7 +3,7 @@ import { categories } from '@/domain/categories'
 import type { IndicatorFilters, IndicatorPeriod } from '@/domain/indicators'
 import type { CategoryId } from '@/domain/types'
 
-const periods: IndicatorPeriod[] = ['4s', 'encontros', 'tudo']
+const periods: IndicatorPeriod[] = ['4s', 'tudo']
 const categoryIds = new Set<string>(categories.map((category) => category.id))
 
 export function useIndicatorFilters() {

@@ -1,4 +1,4 @@
-export const PROJECT_INSTAGRAM: string | null = null
+export const PROJECT_INSTAGRAM = 'inframap.g3'
 
 export const PROJECT_ADVISOR = 'Douglas Rosa Grillo'
 
@@ -12,18 +12,6 @@ export const PROJECT_MEMBERS = [
   'Samuel Barbosa da Silva',
   'Weslley Candido Madeira da Rocha',
   'Wendell Candido Madeira da Rocha',
-]
-
-export interface Encounter {
-  association: string | null
-  schedule: string | null
-}
-
-export const ENCOUNTERS: Encounter[] = [
-  { association: null, schedule: null },
-  { association: null, schedule: null },
-  { association: null, schedule: null },
-  { association: null, schedule: null },
 ]
 
 export const PROJECT_CONTACT_EMAIL: string | null = null

@@ -1,12 +1,13 @@
 import type { StatusId } from '@/domain/types'
 
-export type QueueTab = 'todos' | StatusId
+export type QueueTab = 'todos' | StatusId | 'invalida'
 
 const tabs: { id: QueueTab; label: string }[] = [
   { id: 'todos', label: 'Todos' },
   { id: 'aberta', label: 'Novos' },
   { id: 'andamento', label: 'Em andamento' },
   { id: 'resolvida', label: 'Resolvidos' },
+  { id: 'invalida', label: 'Inválidos' },
 ]
 
 interface QueueTabsProps {

@@ -8,6 +8,7 @@ import { teamRepo } from '@/data/teamRepo'
 import { getCategory } from '@/domain/categories'
 import type { Occurrence, StatusId } from '@/domain/types'
 import { forwardTargets } from '../forwardTargets'
+import { DeleteForever } from './DeleteForever'
 import { DuplicateCard } from './DuplicateCard'
 import { StatusPicker } from './StatusPicker'
 
@@ -15,10 +16,12 @@ const NOT_FORWARDED = ''
 
 interface ReviewPanelProps {
   occurrence: Occurrence
+  isAdmin: boolean
   onSaved: (message: string) => void
 }
 
-export function ReviewPanel({ occurrence, onSaved }: ReviewPanelProps) {
+export function ReviewPanel({ occurrence, isAdmin, onSaved }: ReviewPanelProps) {
+  const invalid = occurrence.moderation === 'invalida'
   const [status, setStatus] = useState<StatusId>(occurrence.status)
   const [forwardedTo, setForwardedTo] = useState(occurrence.forwardedTo ?? NOT_FORWARDED)
   const [note, setNote] = useState('')
@@ -26,11 +29,13 @@ export function ReviewPanel({ occurrence, onSaved }: ReviewPanelProps) {
 
   useEffect(() => {
     let active = true
-    teamRepo.possibleDuplicate(occurrence).then((candidate) => active && setDuplicate(candidate))
+    if (!invalid) {
+      teamRepo.possibleDuplicate(occurrence).then((candidate) => active && setDuplicate(candidate))
+    }
     return () => {
       active = false
     }
-  }, [occurrence])
+  }, [occurrence, invalid])
 
   async function save() {
     await teamRepo.update(occurrence.id, { status, forwardedTo: forwardedTo || null, note })
@@ -89,67 +94,73 @@ export function ReviewPanel({ occurrence, onSaved }: ReviewPanelProps) {
         <p className="text-sm leading-snug text-carvao">“{occurrence.description}”</p>
       )}
 
-      <StatusPicker value={status} onChange={setStatus} />
+      {invalid ? (
+        <DeleteForever occurrence={occurrence} isAdmin={isAdmin} onDeleted={onSaved} />
+      ) : (
+        <>
+          <StatusPicker value={status} onChange={setStatus} />
 
-      <label className="relative flex flex-col gap-2 text-sm font-bold">
-        Repassado para
-        <select
-          value={forwardedTo}
-          onChange={(event) => setForwardedTo(event.target.value)}
-          className="h-12 appearance-none rounded-control border-[1.5px] border-[#CFC8B8] bg-branco pr-10 pl-3.5 text-sm font-medium"
-        >
-          <option value={NOT_FORWARDED}>Ainda não repassado</option>
-          {forwardTargets.map((target) => (
-            <option key={target}>{target}</option>
-          ))}
-        </select>
-        <StrokeIcon
-          path="M6 9l6 6 6-6"
-          size={18}
-          strokeWidth={2.4}
-          className="pointer-events-none absolute right-3.5 bottom-3.5"
-        />
-      </label>
+          <label className="relative flex flex-col gap-2 text-sm font-bold">
+            Repassado para
+            <select
+              value={forwardedTo}
+              onChange={(event) => setForwardedTo(event.target.value)}
+              className="h-12 appearance-none rounded-control border-[1.5px] border-[#CFC8B8] bg-branco pr-10 pl-3.5 text-sm font-medium"
+            >
+              <option value={NOT_FORWARDED}>Ainda não repassado</option>
+              {forwardTargets.map((target) => (
+                <option key={target}>{target}</option>
+              ))}
+            </select>
+            <StrokeIcon
+              path="M6 9l6 6 6-6"
+              size={18}
+              strokeWidth={2.4}
+              className="pointer-events-none absolute right-3.5 bottom-3.5"
+            />
+          </label>
 
-      {duplicate && (
-        <DuplicateCard
-          candidate={duplicate}
-          onMerge={() => merge(duplicate)}
-          onDismiss={() => dismiss(duplicate)}
-        />
+          {duplicate && (
+            <DuplicateCard
+              candidate={duplicate}
+              onMerge={() => merge(duplicate)}
+              onDismiss={() => dismiss(duplicate)}
+            />
+          )}
+
+          <label className="flex flex-col gap-2 text-sm font-bold">
+            <span>
+              Nota para o morador{' '}
+              <span className="text-xs font-normal text-brita">Aparece no andamento do relato</span>
+            </span>
+            <textarea
+              rows={3}
+              value={note}
+              maxLength={300}
+              onChange={(event) => setNote(event.target.value)}
+              placeholder="Ex.: repassado à Secretaria de Obras junto com outros 3 relatos da rua."
+              className="resize-y rounded-control border-[1.5px] border-[#CFC8B8] p-3 text-sm leading-snug font-normal outline-none placeholder:text-[#6B655B] focus:border-asfalto"
+            />
+          </label>
+
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={save}
+              className="h-13 flex-1 rounded-[14px] border-2 border-asfalto bg-faixa text-base font-extrabold shadow-hard"
+            >
+              Salvar
+            </button>
+            <button
+              type="button"
+              onClick={markInvalid}
+              className="h-13 rounded-[14px] border-2 border-aberta bg-branco px-4 text-sm font-bold text-aberta"
+            >
+              Marcar inválido
+            </button>
+          </div>
+        </>
       )}
-
-      <label className="flex flex-col gap-2 text-sm font-bold">
-        <span>
-          Nota para o morador{' '}
-          <span className="text-xs font-normal text-brita">Aparece no andamento do relato</span>
-        </span>
-        <textarea
-          rows={3}
-          value={note}
-          maxLength={300}
-          onChange={(event) => setNote(event.target.value)}
-          placeholder="Ex.: repassado à Secretaria de Obras junto com outros 3 relatos da rua."
-          className="resize-y rounded-control border-[1.5px] border-[#CFC8B8] p-3 text-sm leading-snug font-normal outline-none placeholder:text-[#6B655B] focus:border-asfalto"
-        />
-      </label>
-
-      <div className="flex gap-2">
-        <button
-          type="button"
-          onClick={save}
-          className="h-13 flex-1 rounded-[14px] border-2 border-asfalto bg-faixa text-base font-extrabold shadow-hard"
-        >
-          Salvar
-        </button>
-        <button
-          type="button"
-          onClick={markInvalid}
-          className="h-13 rounded-[14px] border-2 border-aberta bg-branco px-4 text-sm font-bold text-aberta"
-        >
-          Marcar inválido
-        </button>
-      </div>
     </div>
   )
 }

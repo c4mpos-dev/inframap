@@ -1,6 +1,11 @@
 import type { Occurrence, StatusId } from '@/domain/types'
 import { getSupabase, unwrap } from '@/lib/supabaseClient'
-import { OCCURRENCE_COLUMNS, toOccurrence, type OccurrenceRow } from './occurrenceRows'
+import {
+  OCCURRENCE_COLUMNS,
+  PHOTO_BUCKET,
+  toOccurrence,
+  type OccurrenceRow,
+} from './occurrenceRows'
 import { resolveNearby, type NearbyOccurrence } from './occurrencesRepo'
 
 export interface QueueItem {
@@ -19,23 +24,46 @@ interface QueueRow {
   report_count: number
 }
 
+async function loadQueue(rpc: 'team_queue' | 'team_invalid_queue'): Promise<QueueItem[]> {
+  const queue = unwrap(await getSupabase().rpc(rpc)) as QueueRow[]
+  if (queue.length === 0) return []
+  const rows = unwrap(
+    await getSupabase()
+      .from('occurrences_public')
+      .select(OCCURRENCE_COLUMNS)
+      .in(
+        'id',
+        queue.map((item) => item.occurrence_id),
+      ),
+  ) as OccurrenceRow[]
+  const byId = new Map(rows.map((row) => [row.id, toOccurrence(row)]))
+  return queue.flatMap((item) => {
+    const occurrence = byId.get(item.occurrence_id)
+    return occurrence ? [{ occurrence, reportCount: item.report_count }] : []
+  })
+}
+
 export const teamRepo = {
+  /** The review queue plus the invalid reports, which only the team can see. */
   async queue(): Promise<QueueItem[]> {
-    const queue = unwrap(await getSupabase().rpc('team_queue')) as QueueRow[]
-    const rows = unwrap(
-      await getSupabase()
-        .from('occurrences_public')
-        .select(OCCURRENCE_COLUMNS)
-        .in(
-          'id',
-          queue.map((item) => item.occurrence_id),
-        ),
-    ) as OccurrenceRow[]
-    const byId = new Map(rows.map((row) => [row.id, toOccurrence(row)]))
-    return queue.flatMap((item) => {
-      const occurrence = byId.get(item.occurrence_id)
-      return occurrence ? [{ occurrence, reportCount: item.report_count }] : []
-    })
+    const [active, invalid] = await Promise.all([
+      loadQueue('team_queue'),
+      loadQueue('team_invalid_queue'),
+    ])
+    return [...active, ...invalid]
+  },
+
+  async isAdmin(): Promise<boolean> {
+    const { data, error } = await getSupabase().rpc('is_admin')
+    return !error && data === true
+  },
+
+  /** Admins only: erases the report, its duplicates and their photos. */
+  async deleteOccurrence(id: string): Promise<void> {
+    const paths = unwrap(
+      await getSupabase().rpc('team_delete_occurrence', { p_id: Number(id) }),
+    ) as string[]
+    if (paths.length > 0) await getSupabase().storage.from(PHOTO_BUCKET).remove(paths)
   },
 
   async possibleDuplicate(occurrence: Occurrence): Promise<NearbyOccurrence | null> {

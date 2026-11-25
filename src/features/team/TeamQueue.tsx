@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { teamRepo } from '@/data/teamRepo'
 import { StrokeIcon } from '@/components/icons/StrokeIcon'
 import { Toast } from '@/components/ui/Toast'
 import { useToast } from '@/components/ui/useToast'
@@ -14,26 +15,44 @@ export function TeamQueue() {
   const [search, setSearch] = useState('')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const { toast, showToast } = useToast()
+  const [isAdmin, setIsAdmin] = useState(false)
 
-  const all = useMemo(() => items ?? [], [items])
+  useEffect(() => {
+    let active = true
+    teamRepo.isAdmin().then((admin) => active && setIsAdmin(admin))
+    return () => {
+      active = false
+    }
+  }, [])
+
+  const everything = useMemo(() => items ?? [], [items])
+  const all = useMemo(
+    () => everything.filter((item) => item.occurrence.moderation !== 'invalida'),
+    [everything],
+  )
+  const invalid = useMemo(
+    () => everything.filter((item) => item.occurrence.moderation === 'invalida'),
+    [everything],
+  )
   const counts = useMemo(
     () => ({
       todos: all.length,
       aberta: all.filter((item) => item.occurrence.status === 'aberta').length,
       andamento: all.filter((item) => item.occurrence.status === 'andamento').length,
       resolvida: all.filter((item) => item.occurrence.status === 'resolvida').length,
+      invalida: invalid.length,
     }),
-    [all],
+    [all, invalid],
   )
   const query = normalizeText(search)
-  const rows = all.filter(
+  const rows = (tab === 'invalida' ? invalid : all).filter(
     ({ occurrence }) =>
-      (tab === 'todos' || occurrence.status === tab) &&
+      (tab === 'todos' || tab === 'invalida' || occurrence.status === tab) &&
       (!query ||
         normalizeText(`${occurrence.protocol} ${occurrence.neighborhood}`).includes(query)),
   )
   const selected =
-    all.find((item) => item.occurrence.id === selectedId)?.occurrence ?? rows[0]?.occurrence
+    rows.find((item) => item.occurrence.id === selectedId)?.occurrence ?? rows[0]?.occurrence
 
   async function handleSaved(message: string) {
     await reload()
@@ -81,8 +100,9 @@ export function TeamQueue() {
       <aside className="w-full shrink-0 overflow-y-auto border-t border-linha bg-branco px-6 py-7 lg:w-115 lg:border-t-0 lg:border-l">
         {selected ? (
           <ReviewPanel
-            key={`${selected.id}-${selected.status}`}
+            key={`${selected.id}-${selected.status}-${selected.moderation ?? ''}`}
             occurrence={selected}
+            isAdmin={isAdmin}
             onSaved={handleSaved}
           />
         ) : (

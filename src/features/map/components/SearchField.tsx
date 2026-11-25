@@ -8,14 +8,16 @@ interface SearchFieldProps {
 }
 
 const variants = {
-  panel: 'h-12 rounded-control border-[1.5px] border-linha',
-  floating: 'h-12 rounded-[14px] shadow-[0_2px_0_#D3CBB9]',
+  // The panel stacks vertically, so the field keeps its own height there.
+  panel: 'h-12 shrink-0 rounded-control border-[1.5px] border-linha',
+  // On the phone it shares a row with the filter button and takes the free width.
+  floating: 'h-12 flex-1 rounded-[14px] shadow-[0_2px_0_#D3CBB9]',
 }
 
 export function SearchField({ value, onChange, placeholder, variant }: SearchFieldProps) {
   return (
     <label
-      className={`flex min-w-0 flex-1 items-center gap-2.5 bg-branco px-3.5 focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-asfalto ${variants[variant]}`}
+      className={`flex min-w-0 items-center gap-2.5 bg-branco px-3.5 focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-asfalto ${variants[variant]}`}
     >
       <StrokeIcon
         path="M11 4a7 7 0 1 0 0 14a7 7 0 1 0 0-14zM20 20l-3.5-3.5"

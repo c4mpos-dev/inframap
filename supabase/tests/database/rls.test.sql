@@ -2,7 +2,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(26);
+select plan(31);
 
 insert into auth.users (id, instance_id, aud, role, email, is_anonymous, created_at, updated_at) values
   ('11111111-1111-4111-8111-111111111111', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', 'maria@teste.local', false, now(), now()),
@@ -203,6 +203,45 @@ select is(
 select ok(
   public.registered_residents() >= 3,
   'cadastros contam contas confirmadas'
+);
+
+-- Apagar de vez: só admin da equipe.
+reset role;
+update public.occurrences set photo_path = 'teste/foto.jpg' where id = (select id from ids where name = 'mine');
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "33333333-3333-4333-8333-333333333333", "role": "authenticated", "is_anonymous": false}';
+
+select is(
+  (select count(*)::integer from public.team_invalid_queue() where occurrence_id = (select id from ids where name = 'mine')),
+  1,
+  'equipe vê o relato inválido na aba de inválidos'
+);
+select throws_ok(
+  $ select public.team_delete_occurrence((select id from ids where name = 'mine')) $,
+  '42501',
+  null,
+  'equipe sem ser admin não apaga relato'
+);
+
+reset role;
+update public.staff set is_admin = true where user_id = '33333333-3333-4333-8333-333333333333';
+set local role authenticated;
+set local request.jwt.claims = '{"sub": "33333333-3333-4333-8333-333333333333", "role": "authenticated", "is_anonymous": false}';
+
+select is(
+  public.team_delete_occurrence((select id from ids where name = 'mine')),
+  array['teste/foto.jpg'],
+  'admin apaga o relato e recebe a foto para tirar do armazenamento'
+);
+select is(
+  (select count(*)::integer from public.occurrences where id in (select id from ids where name in ('mine', 'copy'))),
+  0,
+  'apagar o original leva junto os duplicados dele'
+);
+select is(
+  (select count(*)::integer from public.status_events where occurrence_id = (select id from ids where name = 'mine')),
+  0,
+  'o andamento do relato apagado some junto'
 );
 
 select * from finish();
